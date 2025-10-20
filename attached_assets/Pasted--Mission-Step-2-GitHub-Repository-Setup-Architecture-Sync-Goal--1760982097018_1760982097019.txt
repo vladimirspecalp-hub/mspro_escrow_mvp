@@ -1,0 +1,64 @@
+🎯 Mission: Step 2 — GitHub Repository Setup & Architecture Sync
+
+Goal:
+Создать новый публичный репозиторий на GitHub под проект escrow-платформы (MVP), 
+загрузить туда весь текущий проект (NestJS + структура модулей), 
+добавить README.md с описанием архитектуры и зафиксировать шаг выполнения.
+
+---
+
+🧩 Repository details:
+- Repository name: mspro_escrow_mvp
+- Description: Escrow / Safe Deal Platform MVP — NestJS + PostgreSQL + TypeScript architecture
+- Visibility: public
+- Default branch: main
+
+---
+
+📦 Actions to perform:
+1. Инициализировать git в текущем проекте (если ещё не инициализирован).
+2. Создать новый публичный репозиторий на GitHub под именем `mspro_escrow_mvp`.
+3. Добавить `.gitignore` с типичными исключениями для Node.js и NestJS.
+4. Закоммитить все файлы (архитектура, src/, prisma/, package.json, README.md).
+5. Запушить проект на GitHub (main branch).
+
+---
+
+🧾 README.md (обязательно создать или обновить):
+Добавь в корень проекта файл README.md со следующей структурой:
+
+# MSPRO Escrow Platform — MVP
+Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
+
+## ✅ Step Progress
+- Step 1 — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
+- Step 2 — Repository Setup (GitHub sync, README, CI-ready) — ✅ Completed
+- Step 3 — Database & Prisma Schema — 🔜 Next
+
+## 🧠 Architecture
+- Framework: NestJS (TypeScript)
+- DB: PostgreSQL (Prisma ORM)
+- Modules: deals, payments, crypto_gateway, users
+- Testing: Jest + Supertest
+- Deployment: Docker-ready
+
+## 🧩 Current State
+- Project initialized and operational
+- `/health` endpoint returns { status: "ok" }
+- Jest tests passed
+- Ready for Step 3 (Database schema creation)
+
+## 📄 Notes
+Each next step must append results and changelog here for architectural supervision.
+
+---
+
+🧪 Validation (self-check before reporting success):
+- Проверить, что репозиторий успешно создан и виден по ссылке GitHub.
+- Проверить, что push прошёл без ошибок.
+- Проверить, что файл README.md содержит вышеуказанную структуру.
+
+---
+
+📤 After completion:
+Сообщи ссылку на GitHub-репозиторий и подтверди, что все тесты прошли.
