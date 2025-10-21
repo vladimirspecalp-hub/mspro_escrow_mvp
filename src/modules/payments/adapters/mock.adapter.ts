@@ -77,7 +77,11 @@ export class MockPaymentAdapter implements IPaymentAdapter {
     const transaction = this.transactions.get(provider_tx_id);
 
     if (!transaction) {
-      throw new Error(`Transaction not found: ${provider_tx_id}`);
+      throw new Error(`Transaction or hold not found: ${provider_tx_id}`);
+    }
+
+    if (transaction.status === 'refunded') {
+      throw new Error(`Transaction already refunded: ${provider_tx_id}`);
     }
 
     const refundAmount = amount || transaction.amount;

@@ -99,9 +99,9 @@ export class AdminService {
       const payment = deal.payments.find((p) => p.status === 'PENDING' || p.status === 'PROCESSING');
       if (payment) {
         if (paymentAction === 'capture') {
-          await this.paymentsService.capturePayment(payment.id);
+          await this.paymentsService.capturePayment(deal.id);
         } else if (paymentAction === 'refund') {
-          await this.paymentsService.refundPayment(payment.id);
+          await this.paymentsService.refundPayment(deal.id);
         }
       }
     }

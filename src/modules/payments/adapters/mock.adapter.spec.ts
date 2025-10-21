@@ -81,7 +81,7 @@ describe('MockPaymentAdapter', () => {
     });
 
     it('should throw error if transaction not found', async () => {
-      await expect(adapter.refund('invalid_id')).rejects.toThrow('Transaction not found');
+      await expect(adapter.refund('invalid_id')).rejects.toThrow('Transaction or hold not found');
     });
   });
 
