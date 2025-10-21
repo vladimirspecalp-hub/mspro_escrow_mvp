@@ -33,14 +33,18 @@ Key features and architectural decisions include:
 **Step 8 (October 21, 2025) - Notifications & Integrations**:
 - Installed @nestjs/event-emitter for event-driven architecture
 - Created NotificationsModule with email and Telegram submodules
-- Implemented MockEmailAdapter and MockTelegramAdapter (interface-based design for easy integration)
+- Implemented MockEmailAdapter and **RealTelegramAdapter** (live Telegram Bot API integration)
 - EmailService handles: deal.created, deal.released, dispute.opened events (notifications to buyer & seller)
 - TelegramService handles: deal.created, dispute.opened events (admin notifications with HTML formatting)
 - EventEmitter2 integrated into DealsService using emitAsync() for proper async handler execution
 - All notifications logged to audit_logs with userId: null (system events, avoids FK violations)
+- **Telegram Integration**: Live bot (@MSPro_Escrow_Bot) sending real notifications
+- **Secrets configured**: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+- **Test endpoint**: POST /test/telegram for manual testing
 - **All unit tests passing (91/91)**: email service 6/6, telegram service 4/4, existing 81/81
 - **E2E tests**: Notifications 6/6 passing ✅ (full deal lifecycle: create -> fund -> confirm -> accept with notifications)
-- **Status**: Production-ready notification infrastructure (ready for Resend/SendGrid & Telegram Bot API integration)
+- **Live test**: Message ID #11 delivered successfully to Telegram ✅
+- **Status**: Production-ready notification infrastructure (Email ready for Resend/SendGrid, Telegram LIVE)
 
 **Step 7 (October 21, 2025) - Security & Audit Hardening**:
 - Created crypto.util.ts with AES-256-GCM encryption/decryption utilities

@@ -24,12 +24,22 @@ export interface DealCreatedEvent {
 @Injectable()
 export class TelegramService {
   private readonly logger = new Logger(TelegramService.name);
-  private readonly adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID || 'mock_admin_chat';
+  private readonly adminChatId = process.env.TELEGRAM_CHAT_ID || 'mock_admin_chat';
 
   constructor(
     @Inject(TELEGRAM_ADAPTER) private readonly telegramAdapter: TelegramAdapter,
     private readonly prisma: PrismaService,
   ) {}
+
+  async sendTestMessage(message: string): Promise<{ success: boolean; messageId?: number }> {
+    this.logger.log('Sending test Telegram message');
+
+    return this.telegramAdapter.sendMessage({
+      chatId: this.adminChatId,
+      text: message,
+      parseMode: 'HTML',
+    });
+  }
 
   @OnEvent('dispute.opened')
   async handleDisputeOpened(event: DisputeOpenedEvent): Promise<void> {

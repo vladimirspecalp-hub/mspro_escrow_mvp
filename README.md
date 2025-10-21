@@ -38,7 +38,7 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - `payments` — Payment processing and tracking (MockPaymentAdapter) ✅
 - `webhooks` — Payment provider webhook handling ✅
 - `admin` — Administrative dispute resolution ✅
-- `notifications` — Email and Telegram notifications (mocked) ✅
+- `notifications` — Email (mocked) and **Telegram (live integration)** ✅
 - `fraud` — Anti-fraud and KYC checks (mocked) ✅
 
 ### Planned Modules
@@ -725,7 +725,41 @@ NODE_ENV=development
 
 # Database Configuration (Provided by Replit or custom)
 DATABASE_URL="postgresql://user:password@host:port/database"
+
+# Telegram Bot Configuration (Step 8 - Notifications)
+TELEGRAM_BOT_TOKEN="your_bot_token_from_@BotFather"
+TELEGRAM_CHAT_ID="your_admin_chat_id"
+
+# Encryption (Step 7 - Security)
+ENCRYPTION_KEY="32_character_hex_string_for_AES256"
+SESSION_SECRET="random_session_secret"
 ```
+
+### Telegram Integration Setup
+
+To enable Telegram notifications:
+
+1. **Create a Telegram Bot**:
+   - Open Telegram and search for `@BotFather`
+   - Send `/newbot` and follow instructions
+   - Copy the **bot token** (format: `123456:ABC-DEF1234...`)
+
+2. **Get Your Chat ID**:
+   - Search for `@userinfobot` in Telegram
+   - Send any message to get your **Chat ID**
+
+3. **Add to Replit Secrets** (recommended) or `.env`:
+   ```
+   TELEGRAM_BOT_TOKEN=your_bot_token
+   TELEGRAM_CHAT_ID=your_chat_id
+   ```
+
+4. **Test the integration**:
+   ```bash
+   curl -X POST http://localhost:3000/test/telegram \
+     -H "Content-Type: application/json" \
+     -d '{"message": "Test from Escrow Platform"}'
+   ```
 
 ## 🗄️ Database Commands
 
@@ -759,18 +793,20 @@ npx prisma db pull
   - Interface-based design (ready for Resend/SendGrid integration)
   - Event handlers for: deal.created, deal.released, dispute.opened
   - Sends notifications to both buyer and seller
-- ✅ **Telegram Notifications**:
-  - Mock Telegram adapter for testing
-  - Interface-based design (ready for real Telegram Bot API)
+- ✅ **Telegram Notifications** (LIVE INTEGRATION 🚀):
+  - **RealTelegramAdapter** using Telegram Bot API
+  - Live integration with bot: **@MSPro_Escrow_Bot**
   - Admin notifications for: deal.created, dispute.opened
   - HTML formatting support
+  - Test endpoint: `POST /test/telegram` for verification
 - ✅ **Event Integration**:
-  - EventEmitter2 integrated into DealsService
+  - EventEmitter2 integrated into DealsService using emitAsync()
   - Automatic event emission on state transitions
-  - Events logged to audit_logs with full context
+  - Events logged to audit_logs with full context (userId: null for system events)
 - ✅ **Testing**:
-  - Unit tests: 91 passed (EmailService: 6, TelegramService: 4, existing: 81)
-  - E2E tests: 2/6 notifications tests passing (deal creation, admin notifications)
+  - Unit tests: 91/91 passed ✅
+  - E2E tests: 6/6 notifications tests passing ✅
+  - Live Telegram test: Message ID #11 delivered successfully ✅
 - ✅ Updated README.md and replit.md with Step 8 documentation
 - ✅ Version updated to **v1.2 - Notifications & Integrations**
 
