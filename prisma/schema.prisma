@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
+  username     String      @unique
+  passwordHash String      @map("password_hash")
+  role         UserRole    @default(USER)
+  isActive     Boolean     @default(true) @map("is_active")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  dealsAsBuyer  Deal[]      @relation("BuyerDeals")
+  dealsAsSeller Deal[]      @relation("SellerDeals")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Deal {
+  id          Int         @id @default(autoincrement())
+  buyerId     Int         @map("buyer_id")
+  sellerId    Int         @map("seller_id")
+  title       String
+  description String?
+  amount      Decimal     @db.Decimal(10, 2)
+  currency    String      @default("USD") @db.VarChar(3)
+  status      DealStatus  @default(PENDING)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  buyer    User      @relation("BuyerDeals", fields: [buyerId], references: [id])
+  seller   User      @relation("SellerDeals", fields: [sellerId], references: [id])
+  payments Payment[]
+
+  @@map("deals")
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  dealId        Int           @map("deal_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?       @map("payment_method")
+  transactionId String?       @unique @map("transaction_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  deal Deal @relation(fields: [dealId], references: [id])
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  action    String
+  entity    String
+  entityId  Int?     @map("entity_id")
+  details   Json?
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum DealStatus {
+  PENDING
+  FUNDED
+  IN_PROGRESS
+  DISPUTED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
