@@ -12,9 +12,16 @@ export class RateLimitMiddleware implements NestMiddleware {
   private readonly logger = new Logger(RateLimitMiddleware.name);
   private readonly storage = new Map<string, RateLimitInfo>();
   private readonly windowMs = 60000; // 1 minute
+  private cleanupInterval: NodeJS.Timeout;
 
   constructor(private readonly configService: ConfigService) {
-    setInterval(() => this.cleanup(), 60000);
+    this.cleanupInterval = setInterval(() => this.cleanup(), 60000);
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
