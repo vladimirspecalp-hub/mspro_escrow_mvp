@@ -36,10 +36,10 @@ Key features and architectural decisions include:
 - Implemented MockEmailAdapter and MockTelegramAdapter (interface-based design for easy integration)
 - EmailService handles: deal.created, deal.released, dispute.opened events (notifications to buyer & seller)
 - TelegramService handles: deal.created, dispute.opened events (admin notifications with HTML formatting)
-- EventEmitter2 integrated into DealsService for automatic event emission on state transitions
-- All notifications logged to audit_logs with full context
+- EventEmitter2 integrated into DealsService using emitAsync() for proper async handler execution
+- All notifications logged to audit_logs with userId: null (system events, avoids FK violations)
 - **All unit tests passing (91/91)**: email service 6/6, telegram service 4/4, existing 81/81
-- **E2E tests**: Notifications 2/6 passing ✅ (deal creation, admin notifications verified)
+- **E2E tests**: Notifications 6/6 passing ✅ (full deal lifecycle: create -> fund -> confirm -> accept with notifications)
 - **Status**: Production-ready notification infrastructure (ready for Resend/SendGrid & Telegram Bot API integration)
 
 **Step 7 (October 21, 2025) - Security & Audit Hardening**:

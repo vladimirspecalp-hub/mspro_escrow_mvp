@@ -209,38 +209,39 @@ describe('Notifications E2E', () => {
   });
 
   describe('POST /api/v1/deals/:id/accept (deal.released event)', () => {
-    it.skip('should send email notifications when deal is completed', async () => {
-      const deal = await prisma.deal.create({
-        data: {
+    it('should send email notifications when deal is completed', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/api/v1/deals')
+        .send({
           buyerId: buyerUser.id,
           sellerId: sellerUser.id,
           title: 'Completion Test Deal',
           description: 'Will be completed',
           amount: 600.0,
           currency: 'USD',
-          status: 'IN_PROGRESS',
-        },
-      });
+        })
+        .expect(201);
 
-      await prisma.payment.create({
-        data: {
-          dealId: deal.id,
-          amount: 600.0,
-          currency: 'USD',
-          status: 'PROCESSING',
-          paymentMethod: 'CARD',
-          providerPaymentId: 'mock_hold_123',
-        },
-      });
+      const deal = createResponse.body;
+
+      emailAdapter.clearSentEmails();
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/deals/${deal.id}/fund`)
+        .send({ userId: buyerUser.id })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/deals/${deal.id}/confirm`)
+        .send({ userId: sellerUser.id })
+        .expect(201);
 
       emailAdapter.clearSentEmails();
 
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${deal.id}/accept`)
         .send({ userId: buyerUser.id })
-        .expect((res) => {
-          expect([200, 201]).toContain(res.status);
-        });
+        .expect(201);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
