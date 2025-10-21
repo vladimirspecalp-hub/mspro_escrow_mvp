@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentsService } from './payments.service';
 import { PrismaService } from '../../prisma.service';
 import { MockPaymentAdapter } from './adapters/mock.adapter';
-import { PAYMENT_ADAPTER } from './payments.module';
+import { PAYMENT_ADAPTER } from './adapters/payment-adapter.interface';
 import { NotFoundException } from '@nestjs/common';
 
 describe('PaymentsService', () => {

@@ -1,11 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DealsService } from './deals.service';
 import { PrismaService } from '../../prisma.service';
+import { PaymentsService } from '../payments/payments.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('DealsService', () => {
   let service: DealsService;
   let prisma: PrismaService;
+  let paymentsService: PaymentsService;
+
+  const mockPaymentsService = {
+    holdPayment: jest.fn(),
+    capturePayment: jest.fn(),
+    refundPayment: jest.fn(),
+  };
 
   const mockPrismaService = {
     deal: {
@@ -13,6 +21,9 @@ describe('DealsService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+    },
+    payment: {
+      findMany: jest.fn(),
     },
     auditLog: {
       create: jest.fn(),
@@ -43,11 +54,16 @@ describe('DealsService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: PaymentsService,
+          useValue: mockPaymentsService,
+        },
       ],
     }).compile();
 
     service = module.get<DealsService>(DealsService);
     prisma = module.get<PrismaService>(PrismaService);
+    paymentsService = module.get<PaymentsService>(PaymentsService);
 
     jest.clearAllMocks();
   });

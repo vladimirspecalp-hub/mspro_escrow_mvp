@@ -3,13 +3,24 @@
 ## Overview
 This is a NestJS-based backend API for an escrow platform. The project is built with TypeScript and follows modern NestJS best practices with modular architecture.
 
-**Current Version**: Escrow Core MVP (v0.9)
+**Current Version**: Escrow Core MVP (v0.9.5)
 
-**Current State**: Step 4 Complete - Deals Module with 6-state State Machine
+**Current State**: Step 5 Partial - Payments Module (Isolated, Integration Pending)
 
 **Last Updated**: October 21, 2025
 
 ## Recent Changes
+- **October 21, 2025 - Step 5 (Partial - Payments Module)**:
+  - Created Payments module with controller, service, DTOs, and interfaces
+  - Implemented MockPaymentAdapter with hold/capture/refund operations
+  - Added comprehensive payment logging and audit trail
+  - Extended Prisma schema with payment tracking fields
+  - **All unit tests passing (40/40)**: 23 payment tests + 17 existing tests
+  - **Known Issue**: Circular dependency prevents PaymentsModule integration into AppModule
+  - **Status**: Payments module works in isolation; integration requires architecture refactoring
+  - **Next Step**: Refactor to use event-driven architecture or queues for payment integration
+  - Created KNOWN_ISSUES.md to track integration blockers
+
 - **October 21, 2025 - Step 4 (Escrow Core MVP v0.9)**:
   - Created Deals module with controller, service, and DTOs
   - Implemented **6-state state machine** (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
@@ -64,15 +75,26 @@ escrow-platform/
 │   │   │   ├── database.controller.ts
 │   │   │   ├── database.controller.spec.ts
 │   │   │   └── database.service.ts
-│   │   └── deals/
-│   │       ├── deals.module.ts
-│   │       ├── deals.controller.ts
-│   │       ├── deals.service.ts
-│   │       ├── deals.service.spec.ts
+│   │   ├── deals/
+│   │   │   ├── deals.module.ts
+│   │   │   ├── deals.controller.ts
+│   │   │   ├── deals.service.ts
+│   │   │   ├── deals.service.spec.ts
+│   │   │   └── dto/
+│   │   │       ├── create-deal.dto.ts
+│   │   │       └── index.ts
+│   │   └── payments/
+│   │       ├── payments.module.ts (⚠️ not integrated)
+│   │       ├── payments.controller.ts
+│   │       ├── payments.service.ts
+│   │       ├── payments.service.spec.ts
+│   │       ├── adapters/
+│   │       │   ├── payment-adapter.interface.ts
+│   │       │   └── mock.adapter.ts
 │   │       └── dto/
-│   │           ├── create-deal.dto.ts
 │   │           └── index.ts
 │   ├── prisma.service.ts
+│   ├── prisma.module.ts (global)
 │   ├── main.ts
 │   ├── app.module.ts
 │   ├── app.controller.ts
@@ -93,6 +115,7 @@ escrow-platform/
 ├── .prettierrc
 ├── .env
 ├── .gitignore
+├── KNOWN_ISSUES.md
 └── README.md
 ```
 
@@ -156,9 +179,10 @@ Required environment variables (managed by Replit):
 
 ## Testing
 All tests passing:
-- Unit tests: 17 passed (health: 1, database: 4, deals: 12)
+- Unit tests: 40 passed (health: 1, database: 4, deals: 12, payments: 23)
 - E2E tests: 9 passed (app: 2, database: 1, deals: 6)
-- **Total: 26 tests passed**
+- **Total: 49 tests (40 unit + 9 e2e)**
+- **Note**: Payments e2e tests pending integration fix
 
 Run tests with:
 ```bash
@@ -226,18 +250,34 @@ Deal States: PENDING → FUNDED → IN_PROGRESS → COMPLETED
 
 **Audit Logging**: All transitions logged to `audit_logs` table
 
-## Roadmap (v0.9 → v1.0)
+## Roadmap (v0.9.5 → v1.0)
 
-### Step 5 — ЮKassa Integration (Payment Hold/Release)
-**Goal**: Integrate ЮKassa payment gateway with hold/release functionality
-- Configure ЮKassa API connection and credentials
-- Implement payment hold on deal creation
-- Implement payment release on deal completion
-- Add webhook handlers for payment status updates
-- Create Payment module with transaction tracking
+### Step 5 — Payment Integration (In Progress)
+**Goal**: Complete payment gateway integration with hold/release functionality
+
+**✅ Completed**:
+- Payment module structure (controller, service, DTOs)
+- Mock payment adapter with hold/capture/refund operations
+- Payment logging to audit_logs table
+- Comprehensive unit tests (23/23 passing)
+
+**⚠️ Blocked**:
+- Circular dependency issue prevents module integration
+- Root cause: Complex dependency chain in PaymentsModule factory
+- Impact: Payments module works in isolation but cannot be imported into AppModule
+
+**🔧 Required Fix**:
+- Refactor to event-driven architecture (NestJS events or message queue)
+- Decouple PaymentsService from DealsService via events
+- Alternative: Use webhook-based approach for payment callbacks
+
+**📋 Remaining Tasks**:
+- Fix circular dependency (architecture refactoring)
+- Integrate PaymentsService with DealsService
+- Add ЮKassa adapter (after mock adapter works)
 - Add User authentication (JWT-based)
 - Add role-based authorization guards
-- Write comprehensive tests for payment flows
+- Write e2e tests for payment flows
 
 ### Step 6 — Extended State Machine & Arbitration
 **Goal**: Expand state machine to full escrow workflow with arbitration

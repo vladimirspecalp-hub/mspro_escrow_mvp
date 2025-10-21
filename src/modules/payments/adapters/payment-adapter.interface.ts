@@ -1,3 +1,5 @@
+export const PAYMENT_ADAPTER = 'PAYMENT_ADAPTER';
+
 export interface HoldResult {
   provider_hold_id: string;
   status: 'held';

@@ -3,8 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { MockPaymentAdapter } from './adapters/mock.adapter';
-
-export const PAYMENT_ADAPTER = 'PAYMENT_ADAPTER';
+import { PAYMENT_ADAPTER } from './adapters/payment-adapter.interface';
 
 @Module({
   controllers: [PaymentsController],
