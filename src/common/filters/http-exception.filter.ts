@@ -73,7 +73,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         this.logger.error(logMessage, stack);
         break;
       case 'fatal':
-        this.logger.fatal(logMessage, stack);
+        this.logger.error(`[FATAL] ${logMessage}`, stack);
         break;
       default:
         this.logger.error(logMessage);
