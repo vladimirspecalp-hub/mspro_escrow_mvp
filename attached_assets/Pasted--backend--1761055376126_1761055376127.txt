@@ -1,0 +1,122 @@
+Повысить надёжность, безопасность и прозрачность backend-сервиса.
+Добавить централизованный аудит действий, ограничение частоты запросов и унифицированную обработку ошибок.
+
+🧩 Задачи для Agent 3:
+1. Audit Logging
+
+📁 Модуль: src/modules/audit/
+
+Создать файлы:
+
+audit.module.ts
+audit.service.ts
+audit.interceptor.ts
+audit.repository.ts
+
+
+audit.service.ts:
+
+методы: logAction(userId, action, details)
+
+сохраняет данные в таблицу audit_logs
+
+формат записи:
+
+{
+  "userId": 123,
+  "action": "DEAL_CREATED",
+  "details": { "dealId": 456 },
+  "timestamp": "2025-10-21T12:00:00Z"
+}
+
+
+Подключить AuditInterceptor глобально — логировать все POST, PATCH, DELETE запросы.
+
+Логи сохранять в PostgreSQL + дублировать в Redis (TTL = 7 дней).
+
+2. Rate Limiting
+
+📁 Модуль: src/middleware/rate-limit.middleware.ts
+
+Использовать @nestjs/throttler или кастомное решение с Redis.
+
+Ограничения:
+
+Анонимные: 20 req / мин
+
+Авторизованные: 100 req / мин
+
+Админы: без лимита
+
+При превышении → ошибка 429 Too Many Requests.
+
+3. Error Handling
+
+📁 Модуль: src/common/filters/http-exception.filter.ts
+
+Централизованный фильтр ошибок.
+
+Формат ответа:
+
+{
+  "statusCode": 400,
+  "message": "Invalid request",
+  "timestamp": "2025-10-21T12:05:00Z",
+  "path": "/api/v1/deals"
+}
+
+
+Поддержка уровней логирования (warn, error, fatal).
+
+Автоматическая отправка Telegram уведомлений администратору при 500 ошибках (в проде).
+
+4. Database
+
+Добавить таблицу:
+
+CREATE TABLE audit_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id),
+  action VARCHAR(100),
+  details JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX idx_audit_user_action ON audit_logs(user_id, action);
+
+5. Тесты
+
+Unit тесты:
+
+Audit логирование
+
+Rate limiting middleware
+
+Exception filter
+
+E2E тесты:
+
+Проверка лимитов
+
+Проверка записи действий в аудит
+
+6. README.md обновить
+
+Добавить раздел:
+
+“Audit & Error Handling”
+С кратким описанием логирования, лимитов и примерами JSON ошибок.
+
+7. .env
+
+Добавить:
+
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_USER=100
+RATE_LIMIT_GUEST=20
+AUDIT_LOG_TTL_DAYS=7
+TELEGRAM_ALERTS_ON_ERROR=true
+
+
+📘 Commit message:
+
+Step 10: Added Audit Logging, Rate Limiting, and Error Handling system
