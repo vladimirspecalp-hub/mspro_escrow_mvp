@@ -12,6 +12,7 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { FraudModule } from './hooks/kyc_fraud/fraud.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { KycModule } from './modules/kyc/kyc.module';
 import { AuditMiddleware } from './middleware/audit.middleware';
 
 @Module({
@@ -29,6 +30,7 @@ import { AuditMiddleware } from './middleware/audit.middleware';
     AdminModule,
     FraudModule,
     NotificationsModule,
+    KycModule,
   ],
   controllers: [AppController],
   providers: [AppService],
