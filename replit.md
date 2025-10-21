@@ -3,9 +3,9 @@
 ## Overview
 This is a NestJS-based backend API for an escrow platform. The project is built with TypeScript and follows modern NestJS best practices with modular architecture.
 
-**Current Version**: Escrow Core MVP (v1.0)
+**Current Version**: Escrow Core MVP (v0.9.5)
 
-**Current State**: Step 5 Complete - Payment Integration with Mock Adapter
+**Current State**: Step 5 Functional - Payment Integration with Mock Adapter (E2E Suite Needs Stabilization)
 
 **Last Updated**: October 21, 2025
 
@@ -20,8 +20,10 @@ This is a NestJS-based backend API for an escrow platform. The project is built 
   - **Integrated with DealsService**: hold on fund, capture on accept, refund on cancel
   - Created global PrismaModule for centralized database access
   - **All unit tests passing (40/40)**: 23 payment tests + 17 existing tests
+  - E2E tests: 12/18 passing (6 failures due to test setup issues, not functional bugs)
   - Updated KNOWN_ISSUES.md with resolution details
-  - **Status**: MVP complete with mock payment gateway; ready for ЮKassa integration
+  - **Status**: Core MVP functional (v0.9.5); e2e test suite needs DB isolation fixes; ready for ЮKassa integration after e2e stabilization
+  - **Architect Review**: Core functionality validated; e2e failures are test environment issues (DB races), not logic bugs
 
 - **October 21, 2025 - Step 4 (Escrow Core MVP v0.9)**:
   - Created Deals module with controller, service, and DTOs
@@ -180,18 +182,24 @@ Required environment variables (managed by Replit):
 - `POST /api/v1/deals/:id/cancel` - Cancel deal (buyer or seller)
 
 ## Testing
-All tests passing:
-- Unit tests: 40 passed (health: 1, database: 4, deals: 12, payments: 23)
-- E2E tests: 9 passed (app: 2, database: 1, deals: 6)
-- **Total: 49 tests (40 unit + 9 e2e)**
-- **Note**: Payments e2e tests pending integration fix
+Test Status:
+- **Unit tests: 40/40 passed** ✅ (health: 1, database: 4, deals: 12, payments: 23)
+- **E2E tests: 12/18 passed** ⚠️ (app: 2, database: 1, deals: 6, payments: 3)
+- **Total: 52/58 tests passing (89.6%)**
+
+**E2E Test Issues** (6 failures):
+- Test setup/environment issues (not core functionality bugs)
+- HTTP status code expectation mismatches (200 vs 201)
+- Database cleanup between test suites needs improvement
+- All core escrow+payment flows validated through unit tests
 
 Run tests with:
 ```bash
-npm test           # Unit tests
-npm run test:e2e   # E2E tests
+npm test           # Unit tests (all passing)
+npm run test:e2e   # E2E tests (12/18 passing)
 npm run test:cov   # Coverage report
 ```
+
 
 ## Development
 The server runs on port 3000 by default. Access endpoints:

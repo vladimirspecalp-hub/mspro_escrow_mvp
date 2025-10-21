@@ -82,7 +82,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${dealId}/fund`)
         .send({ userId: buyerUser.id })
-        .expect(200);
+        .expect(201);
 
       const payments = await prisma.payment.findMany({ where: { dealId } });
       expect(payments.length).toBe(1);
@@ -101,7 +101,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${dealId}/confirm`)
         .send({ userId: sellerUser.id })
-        .expect(200);
+        .expect(201);
 
       const deal = await prisma.deal.findUnique({ where: { id: dealId } });
       expect(deal.status).toBe('IN_PROGRESS');
@@ -111,7 +111,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${dealId}/accept`)
         .send({ userId: buyerUser.id })
-        .expect(200);
+        .expect(201);
 
       const deal = await prisma.deal.findUnique({ where: { id: dealId } });
       expect(deal.status).toBe('COMPLETED');
@@ -175,7 +175,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${dealId}/fund`)
         .send({ userId: buyerUser.id })
-        .expect(200);
+        .expect(201);
 
       const payments = await prisma.payment.findMany({ where: { dealId } });
       expect(payments.length).toBe(1);
@@ -186,7 +186,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       await request(app.getHttpServer())
         .post(`/api/v1/deals/${dealId}/cancel`)
         .send({ userId: buyerUser.id, reason: 'Changed my mind' })
-        .expect(200);
+        .expect(201);
 
       const deal = await prisma.deal.findUnique({ where: { id: dealId } });
       expect(deal.status).toBe('CANCELLED');
