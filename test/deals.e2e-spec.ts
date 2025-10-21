@@ -29,7 +29,8 @@ describe('Deals (e2e)', () => {
       data: {
         email: 'buyer@test.com',
         username: 'buyer_test',
-        passwordHash: 'hash',
+        password: 'hash',
+        name: 'Test Buyer',
       },
     });
 
@@ -37,7 +38,8 @@ describe('Deals (e2e)', () => {
       data: {
         email: 'seller@test.com',
         username: 'seller_test',
-        passwordHash: 'hash',
+        password: 'hash',
+        name: 'Test Seller',
       },
     });
   });

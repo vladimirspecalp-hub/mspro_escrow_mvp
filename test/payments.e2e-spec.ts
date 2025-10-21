@@ -31,7 +31,8 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       data: {
         email: 'buyer.payment@test.com',
         username: 'buyer_payment',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Payment Buyer',
       },
     });
 
@@ -39,7 +40,8 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       data: {
         email: 'seller.payment@test.com',
         username: 'seller_payment',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Payment Seller',
       },
     });
   });

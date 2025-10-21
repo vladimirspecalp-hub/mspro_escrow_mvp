@@ -16,6 +16,7 @@ import { FraudModule } from './hooks/kyc_fraud/fraud.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { KycModule } from './modules/kyc/kyc.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AuthModule } from './auth/auth.module';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
@@ -38,6 +39,7 @@ import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
     }),
     PrismaModule,
     AuditModule,
+    AuthModule,
     HealthModule,
     DatabaseModule,
     DealsModule,

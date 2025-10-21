@@ -27,7 +27,8 @@ describe('Audit & Error Handling E2E', () => {
         data: {
           email: 'audit-test@example.com',
           username: 'auditTestUser',
-          passwordHash: 'hashed',
+          password: 'hashed',
+          name: 'Audit Test User',
           role: 'USER',
           kycStatus: 'VERIFIED',
         },

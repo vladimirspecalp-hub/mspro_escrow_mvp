@@ -34,7 +34,8 @@ describe('KYC E2E', () => {
       data: {
         email: 'kyc.user@test.com',
         username: 'kyc_test_user',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'KYC Test User',
         kycStatus: KycStatus.UNVERIFIED,
         riskScore: 0,
       },
@@ -44,7 +45,8 @@ describe('KYC E2E', () => {
       data: {
         email: 'kyc.admin@test.com',
         username: 'kyc_admin',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'KYC Admin',
         role: 'ADMIN',
         kycStatus: KycStatus.VERIFIED,
       },
@@ -54,7 +56,8 @@ describe('KYC E2E', () => {
       data: {
         email: 'kyc.seller@test.com',
         username: 'kyc_seller',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'KYC Seller',
         kycStatus: KycStatus.VERIFIED,
       },
     });
@@ -102,7 +105,8 @@ describe('KYC E2E', () => {
           id: 1,
           email: 'kyc.test1@test.com',
           username: 'kyc_test1',
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'KYC Test User 1',
           kycStatus: KycStatus.UNVERIFIED,
         },
       });
@@ -189,7 +193,8 @@ describe('KYC E2E', () => {
         data: {
           email: `pending_${Date.now()}@test.com`,
           username: `pending_user_${Date.now()}`,
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Pending User',
           kycStatus: KycStatus.PENDING,
           riskScore: 45,
         },
@@ -258,7 +263,8 @@ describe('KYC E2E', () => {
         data: {
           email: 'unverified.buyer@test.com',
           username: 'unverified_buyer',
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Unverified Buyer',
           kycStatus: KycStatus.UNVERIFIED,
           riskScore: 0,
         },
@@ -268,7 +274,8 @@ describe('KYC E2E', () => {
         data: {
           email: 'verified.buyer@test.com',
           username: 'verified_buyer',
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Verified Buyer',
           kycStatus: KycStatus.VERIFIED,
           riskScore: 30,
         },
@@ -278,7 +285,8 @@ describe('KYC E2E', () => {
         data: {
           email: 'rejected.buyer@test.com',
           username: 'rejected_buyer',
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Rejected Buyer',
           kycStatus: KycStatus.REJECTED,
           riskScore: 85,
         },
@@ -393,7 +401,8 @@ describe('KYC E2E', () => {
         data: {
           email: `limit_test_${Date.now()}@test.com`,
           username: `limit_test_${Date.now()}`,
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Limit Test User',
           kycStatus: KycStatus.UNVERIFIED,
         },
       });
@@ -413,7 +422,8 @@ describe('KYC E2E', () => {
         data: {
           email: `verified_limit_${Date.now()}@test.com`,
           username: `verified_limit_${Date.now()}`,
-          passwordHash: 'hashed_password',
+          password: 'hashed_password',
+          name: 'Verified Limit User',
           kycStatus: KycStatus.VERIFIED,
         },
       });

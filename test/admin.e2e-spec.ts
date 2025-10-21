@@ -35,7 +35,8 @@ describe('Admin E2E', () => {
       data: {
         email: 'admin@test.com',
         username: 'admin_user',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Admin User',
         role: 'ADMIN',
       },
     });
@@ -44,7 +45,8 @@ describe('Admin E2E', () => {
       data: {
         email: 'buyer.admin@test.com',
         username: 'buyer_admin',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Test Buyer',
       },
     });
 
@@ -52,7 +54,8 @@ describe('Admin E2E', () => {
       data: {
         email: 'seller.admin@test.com',
         username: 'seller_admin',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Test Seller',
       },
     });
   });

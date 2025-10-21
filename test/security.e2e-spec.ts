@@ -31,7 +31,8 @@ describe('Security E2E', () => {
       data: {
         email: 'buyer.security@test.com',
         username: 'buyer_security',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Security Buyer',
         kycStatus: 'VERIFIED',
         riskScore: 20,
       },
@@ -41,7 +42,8 @@ describe('Security E2E', () => {
       data: {
         email: 'seller.security@test.com',
         username: 'seller_security',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Security Seller',
         kycStatus: 'VERIFIED',
         riskScore: 25,
       },

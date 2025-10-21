@@ -39,7 +39,8 @@ describe('Notifications E2E', () => {
       data: {
         email: 'buyer-notif@test.com',
         username: 'buyer-notif',
-        passwordHash: 'hash123',
+        password: 'hash123',
+        name: 'Buyer Notif',
         role: 'USER',
         kycStatus: 'VERIFIED',
         riskScore: 15,
@@ -50,7 +51,8 @@ describe('Notifications E2E', () => {
       data: {
         email: 'seller-notif@test.com',
         username: 'seller-notif',
-        passwordHash: 'hash456',
+        password: 'hash456',
+        name: 'Seller Notif',
         role: 'USER',
         kycStatus: 'VERIFIED',
         riskScore: 18,

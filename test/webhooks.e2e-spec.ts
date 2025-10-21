@@ -31,7 +31,8 @@ describe('Webhooks E2E', () => {
       data: {
         email: 'buyer.webhook@test.com',
         username: 'buyer_webhook',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Webhook Buyer',
       },
     });
 
@@ -39,7 +40,8 @@ describe('Webhooks E2E', () => {
       data: {
         email: 'seller.webhook@test.com',
         username: 'seller_webhook',
-        passwordHash: 'hashed_password',
+        password: 'hashed_password',
+        name: 'Webhook Seller',
       },
     });
   });

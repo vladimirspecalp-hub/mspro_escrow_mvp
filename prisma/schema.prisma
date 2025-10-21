@@ -10,8 +10,10 @@ datasource db {
 model User {
   id           Int         @id @default(autoincrement())
   email        String      @unique
-  username     String      @unique
-  passwordHash String      @map("password_hash")
+  username     String?     @unique
+  password     String
+  name         String
+  phone        String?
   role         UserRole    @default(USER)
   isActive     Boolean     @default(true) @map("is_active")
   kycStatus    KycStatus   @default(UNVERIFIED) @map("kyc_status")
