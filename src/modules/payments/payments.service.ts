@@ -173,4 +173,10 @@ export class PaymentsService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  registerTestTransaction(provider_id: string, amount: number, currency: string, status: 'held' | 'captured' = 'held'): void {
+    if (this.paymentAdapter['registerTestTransaction']) {
+      this.paymentAdapter['registerTestTransaction'](provider_id, amount, currency, status);
+    }
+  }
 }

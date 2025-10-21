@@ -12,6 +12,16 @@ export class MockPaymentAdapter implements IPaymentAdapter {
   private readonly logger = new Logger(MockPaymentAdapter.name);
   private readonly transactions = new Map<string, StatusResult>();
 
+  registerTestTransaction(provider_id: string, amount: number, currency: string, status: 'held' | 'captured' = 'held'): void {
+    this.transactions.set(provider_id, {
+      status,
+      provider_id,
+      amount,
+      currency,
+    });
+    this.logger.log(`[MOCK TEST] Registered test transaction: ${provider_id} (${status})`);
+  }
+
   async hold(
     amount: number,
     currency: string,

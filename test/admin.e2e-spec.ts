@@ -3,10 +3,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
+import { PaymentsService } from '../src/modules/payments/payments.service';
 
 describe('Admin E2E', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let paymentsService: PaymentsService;
   let adminUser: any;
   let buyerUser: any;
   let sellerUser: any;
@@ -27,6 +29,7 @@ describe('Admin E2E', () => {
     await app.init();
 
     prisma = app.get<PrismaService>(PrismaService);
+    paymentsService = app.get<PaymentsService>(PaymentsService);
 
     adminUser = await prisma.user.create({
       data: {
@@ -103,6 +106,8 @@ describe('Admin E2E', () => {
         },
       });
 
+      paymentsService.registerTestTransaction('mock_admin_resolve_1', 150, 'USD', 'held');
+
       const payment = await prisma.payment.create({
         data: {
           dealId: deal.id,
@@ -148,6 +153,8 @@ describe('Admin E2E', () => {
           status: 'DISPUTED',
         },
       });
+
+      paymentsService.registerTestTransaction('mock_admin_refund_1', 200, 'USD', 'held');
 
       await prisma.payment.create({
         data: {
