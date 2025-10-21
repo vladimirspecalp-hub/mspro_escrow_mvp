@@ -61,11 +61,14 @@ export class MockPaymentAdapter implements IPaymentAdapter {
       currency: transaction.currency,
     };
 
-    this.transactions.set(provider_hold_id, {
+    const capturedTransaction = {
       ...transaction,
-      status: 'captured',
+      status: 'captured' as const,
       provider_id: provider_tx_id,
-    });
+    };
+
+    this.transactions.set(provider_hold_id, capturedTransaction);
+    this.transactions.set(provider_tx_id, capturedTransaction);
 
     return result;
   }

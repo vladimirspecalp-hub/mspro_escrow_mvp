@@ -83,7 +83,7 @@ export class PaymentsService {
         details: {
           dealId,
           paymentId: payment.id,
-          amount: payment.amount.toNumber(),
+          amount: payment.amount,
           currency: payment.currency,
           provider_tx_id: captureResult.provider_tx_id,
         },
