@@ -16,15 +16,35 @@ export class DealsService {
     CANCELLED: [],
   };
 
+  private readonly USER_SELECT = {
+    id: true,
+    email: true,
+    username: true,
+    role: true,
+    isActive: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+
   async createDeal(createDealDto: CreateDealDto) {
     const deal = await this.prisma.deal.create({
       data: {
         ...createDealDto,
         status: 'PENDING',
       },
-      include: {
-        buyer: true,
-        seller: true,
+      select: {
+        id: true,
+        buyerId: true,
+        sellerId: true,
+        title: true,
+        description: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        buyer: { select: this.USER_SELECT },
+        seller: { select: this.USER_SELECT },
       },
     });
 
@@ -33,7 +53,12 @@ export class DealsService {
       'DEAL_CREATED',
       'deal',
       deal.id,
-      { deal },
+      { 
+        dealId: deal.id,
+        title: deal.title,
+        amount: deal.amount,
+        status: deal.status,
+      },
     );
 
     return deal;
@@ -41,9 +66,19 @@ export class DealsService {
 
   async findAll() {
     return this.prisma.deal.findMany({
-      include: {
-        buyer: true,
-        seller: true,
+      select: {
+        id: true,
+        buyerId: true,
+        sellerId: true,
+        title: true,
+        description: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        buyer: { select: this.USER_SELECT },
+        seller: { select: this.USER_SELECT },
         payments: true,
       },
     });
@@ -52,9 +87,19 @@ export class DealsService {
   async findOne(id: number) {
     const deal = await this.prisma.deal.findUnique({
       where: { id },
-      include: {
-        buyer: true,
-        seller: true,
+      select: {
+        id: true,
+        buyerId: true,
+        sellerId: true,
+        title: true,
+        description: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        buyer: { select: this.USER_SELECT },
+        seller: { select: this.USER_SELECT },
         payments: true,
       },
     });
@@ -136,14 +181,26 @@ export class DealsService {
     const updatedDeal = await this.prisma.deal.update({
       where: { id: dealId },
       data: { status: newStatus },
-      include: {
-        buyer: true,
-        seller: true,
+      select: {
+        id: true,
+        buyerId: true,
+        sellerId: true,
+        title: true,
+        description: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        buyer: { select: this.USER_SELECT },
+        seller: { select: this.USER_SELECT },
         payments: true,
       },
     });
 
     await this.logAuditEvent(userId, action, 'deal', dealId, {
+      dealId,
+      title: deal.title,
       previousStatus: currentStatus,
       newStatus,
       ...details,

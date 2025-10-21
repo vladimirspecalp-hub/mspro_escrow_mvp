@@ -20,9 +20,9 @@ describe('Deals (e2e)', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     await app.init();
 
-    await prisma.user.deleteMany();
-    await prisma.deal.deleteMany();
     await prisma.auditLog.deleteMany();
+    await prisma.deal.deleteMany();
+    await prisma.user.deleteMany();
 
     buyer = await prisma.user.create({
       data: {
@@ -42,9 +42,9 @@ describe('Deals (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
-    await prisma.deal.deleteMany();
     await prisma.auditLog.deleteMany();
+    await prisma.deal.deleteMany();
+    await prisma.user.deleteMany();
     await app.close();
   });
 

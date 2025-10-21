@@ -7,6 +7,7 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - **Step 1** — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
 - **Step 2** — Repository Setup (GitHub sync, README, CI-ready) — ✅ Completed
 - **Step 3** — Database & ORM Setup (PostgreSQL + Prisma) — ✅ Completed
+- **Step 4** — Deals Module & State Machine — ✅ Completed
 
 ## 🧠 Architecture
 
@@ -22,9 +23,9 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 ### Implemented Modules
 - `health` — System health monitoring ✅
 - `database` — Database health checks and statistics ✅
+- `deals` — Escrow transaction management with state machine ✅
 
 ### Planned Modules
-- `deals` — Escrow transaction management
 - `payments` — Payment processing and tracking
 - `crypto_gateway` — Cryptocurrency integration
 - `users` — User management and authentication
@@ -40,8 +41,10 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - **/db/health endpoint for database health checks**
 - **/db/stats endpoint for database statistics**
 - **Prisma migrations configured and applied**
-- Jest unit tests: 5 passed
-- Jest e2e tests: 3 passed
+- **Deals module with state machine for escrow workflow**
+- **Audit logging for all state transitions**
+- Jest unit tests: 17 passed
+- Jest e2e tests: 9 passed
 - TypeScript compilation working
 - ESLint and Prettier configured
 - Hot reload development environment
@@ -56,11 +59,19 @@ escrow-platform/
 │   │   │   ├── health.module.ts
 │   │   │   ├── health.controller.ts
 │   │   │   └── health.controller.spec.ts
-│   │   └── database/
-│   │       ├── database.module.ts
-│   │       ├── database.controller.ts
-│   │       ├── database.controller.spec.ts
-│   │       └── database.service.ts
+│   │   ├── database/
+│   │   │   ├── database.module.ts
+│   │   │   ├── database.controller.ts
+│   │   │   ├── database.controller.spec.ts
+│   │   │   └── database.service.ts
+│   │   └── deals/
+│   │       ├── deals.module.ts
+│   │       ├── deals.controller.ts
+│   │       ├── deals.service.ts
+│   │       ├── deals.service.spec.ts
+│   │       └── dto/
+│   │           ├── create-deal.dto.ts
+│   │           └── index.ts
 │   ├── prisma.service.ts
 │   ├── main.ts
 │   ├── app.module.ts
@@ -74,6 +85,7 @@ escrow-platform/
 ├── test/
 │   ├── app.e2e-spec.ts
 │   ├── database.e2e-spec.ts
+│   ├── deals.e2e-spec.ts
 │   └── jest-e2e.json
 ├── package.json
 ├── tsconfig.json
@@ -561,9 +573,9 @@ npm run start:prod
 ## 🧪 Testing
 
 All tests are passing:
-- **Unit tests**: 5 passed
-- **E2E tests**: 3 passed
-- **Total**: 8 tests passed
+- **Unit tests**: 17 passed
+- **E2E tests**: 9 passed
+- **Total**: 26 tests passed
 
 Run tests with:
 ```bash
@@ -571,6 +583,120 @@ npm test           # Unit tests
 npm run test:e2e   # End-to-end tests
 npm run test:cov   # Coverage report
 ```
+
+## 🔄 Deals Module & State Machine
+
+### State Machine Flow
+
+The deals module implements a state machine for managing escrow transactions:
+
+```
+PENDING → FUNDED → IN_PROGRESS → COMPLETED
+   ↓         ↓           ↓
+CANCELLED  CANCELLED  DISPUTED → IN_PROGRESS / COMPLETED / CANCELLED
+```
+
+### State Transition Rules
+
+| From State | To States | Trigger Action |
+|------------|-----------|----------------|
+| PENDING | FUNDED, CANCELLED | fundDeal, cancelDeal |
+| FUNDED | IN_PROGRESS, CANCELLED | confirmExecution, cancelDeal |
+| IN_PROGRESS | COMPLETED, DISPUTED, CANCELLED | acceptByBuyer, raiseDispute, cancelDeal |
+| DISPUTED | IN_PROGRESS, COMPLETED, CANCELLED | Resolution actions |
+| COMPLETED | - | Final state |
+| CANCELLED | - | Final state |
+
+### API Endpoints
+
+All deals endpoints are prefixed with `/api/v1/deals`:
+
+**Create Deal**
+```http
+POST /api/v1/deals
+Content-Type: application/json
+
+{
+  "buyerId": 1,
+  "sellerId": 2,
+  "title": "Product Purchase",
+  "description": "Optional description",
+  "amount": 100.00,
+  "currency": "USD"
+}
+```
+
+**Get All Deals**
+```http
+GET /api/v1/deals
+```
+
+**Get Deal by ID**
+```http
+GET /api/v1/deals/:id
+```
+
+**Fund Deal** (Buyer only)
+```http
+POST /api/v1/deals/:id/fund
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+```
+
+**Confirm Execution** (Seller only)
+```http
+POST /api/v1/deals/:id/confirm
+Content-Type: application/json
+
+{
+  "userId": 2
+}
+```
+
+**Accept Deal** (Buyer only)
+```http
+POST /api/v1/deals/:id/accept
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+```
+
+**Raise Dispute** (Buyer or Seller)
+```http
+POST /api/v1/deals/:id/dispute
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "reason": "Quality issues"
+}
+```
+
+**Cancel Deal** (Buyer or Seller)
+```http
+POST /api/v1/deals/:id/cancel
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "reason": "Changed my mind"
+}
+```
+
+### Audit Logging
+
+All state transitions are automatically logged to the `audit_logs` table with:
+- User ID who triggered the action
+- Action type (e.g., DEAL_CREATED, DEAL_FUNDED, DEAL_CONFIRMED)
+- Entity type (deal) and entity ID
+- Previous and new status
+- Additional details (reason for disputes/cancellations)
+- Timestamp
 
 ## 📝 Environment Variables
 
@@ -609,6 +735,26 @@ npx prisma db pull
 
 ## 📄 Changelog
 
+### Step 4 — Deals Module & State Machine (October 21, 2025)
+- ✅ Created deals module with controller, service, and DTOs
+- ✅ Implemented state machine with 6 states (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
+- ✅ Implemented state transition validation and enforcement
+- ✅ Created 8 API endpoints for deal management:
+  - POST /api/v1/deals (createDeal)
+  - GET /api/v1/deals (findAll)
+  - GET /api/v1/deals/:id (findOne)
+  - POST /api/v1/deals/:id/fund (fundDeal)
+  - POST /api/v1/deals/:id/confirm (confirmExecution)
+  - POST /api/v1/deals/:id/accept (acceptByBuyer)
+  - POST /api/v1/deals/:id/dispute (raiseDispute)
+  - POST /api/v1/deals/:id/cancel (cancelDeal)
+- ✅ Integrated automatic audit logging for all state transitions
+- ✅ Added authorization checks (buyer-only, seller-only actions)
+- ✅ Created comprehensive unit tests (12 test cases)
+- ✅ Created e2e tests covering full deal lifecycle
+- ✅ All tests passing (26/26: 17 unit + 9 e2e)
+- ✅ Updated documentation with state machine flow and API reference
+
 ### Step 3 — Database & ORM Setup (October 21, 2025)
 - ✅ Configured PostgreSQL database via Replit integration
 - ✅ Installed and configured Prisma ORM 6.17.1
@@ -639,14 +785,15 @@ npx prisma db pull
 - ✅ Created modular structure with `src/modules/` directory
 - ✅ Configured development workflow with hot reload
 
-## 🛠️ Next Steps (Step 4)
+## 🛠️ Next Steps (Step 5+)
 
 - [ ] Implement User module with CRUD operations
 - [ ] Add authentication and authorization (JWT)
-- [ ] Implement Deal module for escrow transactions
 - [ ] Add Payment processing module
 - [ ] Implement Crypto Gateway integration
-- [ ] Add API documentation (Swagger)
+- [ ] Add API documentation (Swagger/OpenAPI)
+- [ ] Implement WebSocket notifications for deal updates
+- [ ] Add dispute resolution workflow
 - [ ] Set up CI/CD pipeline
 
 ## 📄 Notes

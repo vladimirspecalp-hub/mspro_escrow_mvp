@@ -71,10 +71,11 @@ describe('DealsService', () => {
       const result = await service.createDeal(createDealDto);
 
       expect(result).toEqual(mockDeal);
-      expect(prisma.deal.create).toHaveBeenCalledWith({
-        data: { ...createDealDto, status: 'PENDING' },
-        include: { buyer: true, seller: true },
-      });
+      expect(prisma.deal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { ...createDealDto, status: 'PENDING' },
+        }),
+      );
       expect(prisma.auditLog.create).toHaveBeenCalled();
     });
   });
@@ -92,11 +93,12 @@ describe('DealsService', () => {
       const result = await service.fundDeal(1, 1);
 
       expect(result.status).toBe('FUNDED');
-      expect(prisma.deal.update).toHaveBeenCalledWith({
-        where: { id: 1 },
-        data: { status: 'FUNDED' },
-        include: { buyer: true, seller: true, payments: true },
-      });
+      expect(prisma.deal.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 1 },
+          data: { status: 'FUNDED' },
+        }),
+      );
     });
 
     it('should transition from FUNDED to IN_PROGRESS', async () => {
