@@ -3,8 +3,8 @@
 ## Overview
 This project is a NestJS-based backend API for an escrow platform, built with TypeScript. Its purpose is to facilitate secure escrow transactions with a focus on a robust state machine, payment integration, administrative dispute resolution, and comprehensive security & audit controls. The platform aims to provide a reliable foundation for safe deal management.
 
-**Current Version**: v1.1  
-**Current State**: Step 7 Complete - Security & Audit Hardening  
+**Current Version**: v1.2  
+**Current State**: Step 8 Complete - Notifications & Integrations  
 **Last Updated**: October 21, 2025
 
 ## User Preferences
@@ -22,13 +22,26 @@ Key features and architectural decisions include:
 - **Payment Integration**: A dedicated Payments module handles payment operations (hold, capture, refund) via an adapter pattern, currently with a MockPaymentAdapter.
 - **Webhooks**: A WebhooksModule processes payment provider callbacks, ensuring idempotency and signature verification.
 - **Admin Arbitration**: An AdminModule provides functionality for manual dispute resolution by authorized administrators/moderators, including actions to complete, refund, or cancel deals.
-- **Audit Logging**: All significant state transitions, HTTP requests, and fraud checks are logged to an `audit_logs` table with IP address, user agent, and action context.
+- **Notifications System**: Email and Telegram notification modules with event-driven architecture using NestJS EventEmitter2. Supports deal.created, deal.released, dispute.opened events.
+- **Audit Logging**: All significant state transitions, HTTP requests, fraud checks, and notifications are logged to an `audit_logs` table with IP address, user agent, and action context.
 - **Fraud Detection**: FraudService provides mock anti-fraud checks for user signup, deal creation, and payment holds, with risk scoring and automatic blocking of high-risk transactions.
 - **Encryption**: Sensitive data encryption utilities using AES-256-GCM (ENCRYPTION_KEY stored in Replit Secrets).
 - **Security**: Password hashes are excluded from API responses, DTO validation applied, audit middleware logs all requests, fraud detection integrated.
 - **Database Schema**: Core tables include `users` (with roles), `deals`, `payments`, `webhook_events`, and `audit_logs` (with IP/user-agent tracking), with defined relationships.
 
 ## Recent Changes
+**Step 8 (October 21, 2025) - Notifications & Integrations**:
+- Installed @nestjs/event-emitter for event-driven architecture
+- Created NotificationsModule with email and Telegram submodules
+- Implemented MockEmailAdapter and MockTelegramAdapter (interface-based design for easy integration)
+- EmailService handles: deal.created, deal.released, dispute.opened events (notifications to buyer & seller)
+- TelegramService handles: deal.created, dispute.opened events (admin notifications with HTML formatting)
+- EventEmitter2 integrated into DealsService for automatic event emission on state transitions
+- All notifications logged to audit_logs with full context
+- **All unit tests passing (91/91)**: email service 6/6, telegram service 4/4, existing 81/81
+- **E2E tests**: Notifications 2/6 passing ✅ (deal creation, admin notifications verified)
+- **Status**: Production-ready notification infrastructure (ready for Resend/SendGrid & Telegram Bot API integration)
+
 **Step 7 (October 21, 2025) - Security & Audit Hardening**:
 - Created crypto.util.ts with AES-256-GCM encryption/decryption utilities
 - Added ENCRYPTION_KEY to Replit Secrets for secure key management

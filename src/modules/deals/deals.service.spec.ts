@@ -45,6 +45,7 @@ describe('DealsService', () => {
 
   const mockEventEmitter = {
     emit: jest.fn(),
+    emitAsync: jest.fn().mockResolvedValue([]),
   };
 
   const mockDeal = {

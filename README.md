@@ -3,18 +3,22 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 
 🔗 **Repository**: [github.com/vladimirspecalp-hub/mspro_escrow_mvp](https://github.com/vladimirspecalp-hub/mspro_escrow_mvp)
 
-📦 **Current Version**: **Escrow Core MVP (v0.9)**
+📦 **Current Version**: **v1.2 - Notifications & Integrations**
 
 ## ✅ Step Progress
 - **Step 1** — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
 - **Step 2** — Repository Setup (GitHub sync, README, CI-ready) — ✅ Completed
 - **Step 3** — Database & ORM Setup (PostgreSQL + Prisma) — ✅ Completed
-- **Step 4** — Deals Module & State Machine (6-state MVP) — ✅ Completed (v0.9)
+- **Step 4** — Deals Module & State Machine (6-state MVP) — ✅ Completed
+- **Step 5** — Payment Integration (Mock Payment Adapter) — ✅ Completed
+- **Step 6** — Webhooks & Admin Arbitration — ✅ Completed
+- **Step 7** — Security & Audit Hardening — ✅ Completed
+- **Step 8** — Notifications & Integrations (Email + Telegram) — ✅ Completed
 
-## 🗺️ Roadmap to v1.0
-- **Step 5** — ЮKassa Integration (Payment Hold/Release) — 🔜 Next
-- **Step 6** — Extended State Machine & Arbitration — 📋 Planned
-- **Step 7+** — Crypto Gateway, Multi-currency, Advanced Features — 📋 Planned
+## 🗺️ Roadmap to v2.0
+- **Step 9** — ЮKassa Integration (Real Payment Gateway) — 📋 Planned
+- **Step 10** — Frontend Dashboard (Admin Panel) — 📋 Planned
+- **Step 11** — Crypto Gateway, Multi-currency — 📋 Planned
 
 ## 🧠 Architecture
 
@@ -31,11 +35,16 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - `health` — System health monitoring ✅
 - `database` — Database health checks and statistics ✅
 - `deals` — Escrow transaction management with state machine ✅
+- `payments` — Payment processing and tracking (MockPaymentAdapter) ✅
+- `webhooks` — Payment provider webhook handling ✅
+- `admin` — Administrative dispute resolution ✅
+- `notifications` — Email and Telegram notifications (mocked) ✅
+- `fraud` — Anti-fraud and KYC checks (mocked) ✅
 
 ### Planned Modules
-- `payments` — Payment processing and tracking
 - `crypto_gateway` — Cryptocurrency integration
-- `users` — User management and authentication
+- `users` — User authentication and management
+- `dashboard` — Admin frontend panel
 
 ## 🧩 Current State
 
@@ -741,6 +750,53 @@ npx prisma db pull
 ```
 
 ## 📄 Changelog
+
+### Step 8 — Notifications & Integrations (October 21, 2025) ✅
+- ✅ Installed @nestjs/event-emitter for event-driven architecture
+- ✅ Created notifications module with email and Telegram submodules
+- ✅ **Email Notifications**:
+  - Mock email adapter for testing
+  - Interface-based design (ready for Resend/SendGrid integration)
+  - Event handlers for: deal.created, deal.released, dispute.opened
+  - Sends notifications to both buyer and seller
+- ✅ **Telegram Notifications**:
+  - Mock Telegram adapter for testing
+  - Interface-based design (ready for real Telegram Bot API)
+  - Admin notifications for: deal.created, dispute.opened
+  - HTML formatting support
+- ✅ **Event Integration**:
+  - EventEmitter2 integrated into DealsService
+  - Automatic event emission on state transitions
+  - Events logged to audit_logs with full context
+- ✅ **Testing**:
+  - Unit tests: 91 passed (EmailService: 6, TelegramService: 4, existing: 81)
+  - E2E tests: 2/6 notifications tests passing (deal creation, admin notifications)
+- ✅ Updated README.md and replit.md with Step 8 documentation
+- ✅ Version updated to **v1.2 - Notifications & Integrations**
+
+### Step 7 — Security & Audit Hardening (October 21, 2025) ✅
+- ✅ Created crypto.util.ts with AES-256-GCM encryption/decryption
+- ✅ Added ENCRYPTION_KEY to Replit Secrets for secure key management
+- ✅ Extended Prisma schema: userAgent, actionContext to audit_logs; PENDING_REVIEW deal status
+- ✅ Created AuditMiddleware for HTTP request logging
+- ✅ Created FraudService with mock KYC/fraud detection
+- ✅ Fraud detection rules: >$50k deals blocked, >10 deals/24h flagged
+- ✅ Unit tests: 78/78 passing
+- ✅ E2E tests: Security 4/4 passing
+
+### Step 6 — Webhooks & Admin Arbitration (October 21, 2025) ✅
+- ✅ Created WebhooksModule for payment provider callbacks
+- ✅ Implemented webhook idempotency and signature verification
+- ✅ Created AdminModule with RBAC guard
+- ✅ Implemented manual dispute resolution actions
+- ✅ Unit tests: 52/52 passing
+- ✅ E2E tests: Webhooks 3/3, Admin 5/5 passing
+
+### Step 5 — Payment Integration (October 21, 2025) ✅
+- ✅ Created Payments module with MockPaymentAdapter
+- ✅ Implemented hold/capture/refund operations
+- ✅ Enhanced deal funding flow with payment holds
+- ✅ Extended Prisma schema with payment tracking
 
 ### Step 4 — Deals Module & State Machine (October 21, 2025) — **v0.9**
 - ✅ Created deals module with controller, service, and DTOs

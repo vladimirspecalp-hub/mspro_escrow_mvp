@@ -90,7 +90,7 @@ export class DealsService {
       },
     );
 
-    this.eventEmitter.emit('deal.created', {
+    await this.eventEmitter.emitAsync('deal.created', {
       dealId: deal.id,
       buyerEmail: deal.buyer.email,
       sellerEmail: deal.seller.email,
@@ -261,7 +261,7 @@ export class DealsService {
     });
 
     if (newStatus === 'COMPLETED') {
-      this.eventEmitter.emit('deal.released', {
+      await this.eventEmitter.emitAsync('deal.released', {
         dealId: updatedDeal.id,
         buyerEmail: updatedDeal.buyer.email,
         sellerEmail: updatedDeal.seller.email,
@@ -273,7 +273,7 @@ export class DealsService {
 
     if (newStatus === 'DISPUTED') {
       const openedBy = userId === deal.buyerId ? 'buyer' : 'seller';
-      this.eventEmitter.emit('dispute.opened', {
+      await this.eventEmitter.emitAsync('dispute.opened', {
         dealId: updatedDeal.id,
         buyerEmail: updatedDeal.buyer.email,
         sellerEmail: updatedDeal.seller.email,

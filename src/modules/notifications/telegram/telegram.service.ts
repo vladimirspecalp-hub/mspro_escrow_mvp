@@ -97,7 +97,7 @@ Seller: ${event.sellerEmail}
           action: `notification.${channel}`,
           entity: 'notification',
           entityId: dealId,
-          userId: 0,
+          userId: null,
           details: {
             event,
             channel,
