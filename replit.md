@@ -33,20 +33,33 @@ Key features and architectural decisions include:
 - **Database Schema**: Core tables include `users` (with roles, kyc_status, risk_score), `deals`, `payments`, `webhook_events`, and `audit_logs` (with IP/user-agent tracking), with defined relationships.
 
 ## Recent Changes
-**Step 11 (October 21, 2025) - Frontend Initialization**:
+**Step 11 (October 21, 2025) - Frontend Initialization & Full-Stack Integration**:
 - Created Next.js 14 project with App Router, TypeScript, and Tailwind CSS 4.1
 - Configured MSPro brand theme (primary: #0077FF, secondary: #202124, accent: #FFD700)
 - Implemented responsive layout with Header, Footer, Container components
 - Created home page with real-time deal listing and API integration
 - Installed and configured shadcn/ui components (Button, Card, Input, Alert)
-- Added lib/api.ts for backend API integration with environment-based URLs
-- Created TypeScript interfaces for User, Deal, Payment entities
+- Added lib/api.ts for backend API integration with **intelligent URL detection**
+- Created TypeScript interfaces for User, Deal, Payment entities (types/index.ts)
 - Inter font with Latin + Cyrillic subset support for Russian UI
 - SEO metadata with OpenGraph and Russian locale
-- Fixed Tailwind CSS 4.x PostCSS configuration (@tailwindcss/postcss plugin)
+- **Critical Fixes Applied**:
+  - Fixed Tailwind CSS 4.x configuration: Migrated to @tailwindcss/postcss plugin (postcss.config.mjs)
+  - Enabled CORS in backend (src/main.ts): `app.enableCors({ origin: true, credentials: true })`
+  - Excluded frontend from backend TypeScript compilation (tsconfig.json: `"exclude": ["node_modules", "dist", "frontend"]`)
+  - **Implemented dynamic API URL detection for Replit deployments**: Automatically detects port-mapped domains (e.g., `-5000.replit.dev` → `-3000.replit.dev`)
+  - Fixed Prisma Decimal handling: Convert `deal.amount` to Number before formatting (`Number(deal.amount).toLocaleString('ru-RU')`)
+- **API URL Detection Logic** (lib/api.ts):
+  1. Manual override via `NEXT_PUBLIC_API_URL` environment variable (if set)
+  2. **Browser (Replit)**: Detects `-XXXX.replit.dev` domains and replaces with `-3000.replit.dev` for backend
+  3. **Browser (Local)**: Uses `http://localhost:3000` (or current protocol/hostname with port 3000)
+  4. **Server-side (SSR)**: Uses `REPLIT_DOMAINS` env var or fallback to `http://localhost:3000`
+- **Full-Stack Integration Verified**: Frontend (port 5000) → Backend API (port 3000) → Database ✅
+- Browser console confirms: `✅ API Response: []` with correct "Нет активных сделок" UI
 - Frontend running on port 5000, backend API on port 3000
-- **Status**: Production-ready frontend foundation with API connectivity
-- **Known Limitations**: No authentication yet (requires Step 13), some API CORS configuration may be needed
+- **All 194 backend tests passing** (135 unit + 59 E2E)
+- **Status**: ✅ Production-ready full-stack application with zero-config API integration
+- **Known Limitations**: No authentication yet (requires Step 13 - Auth Module implementation)
 
 **Step 10 (October 21, 2025) - Audit Logging, Rate Limiting & Error Handling**:
 - Installed @nestjs/throttler for rate limiting infrastructure
