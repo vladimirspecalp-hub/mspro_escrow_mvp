@@ -17,9 +17,10 @@ model User {
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  dealsAsBuyer  Deal[]      @relation("BuyerDeals")
-  dealsAsSeller Deal[]      @relation("SellerDeals")
-  auditLogs     AuditLog[]
+  dealsAsBuyer     Deal[]      @relation("BuyerDeals")
+  dealsAsSeller    Deal[]      @relation("SellerDeals")
+  resolvedDeals    Deal[]      @relation("ResolvedDeals")
+  auditLogs        AuditLog[]
 
   @@map("users")
 }
@@ -33,11 +34,14 @@ model Deal {
   amount      Decimal     @db.Decimal(10, 2)
   currency    String      @default("USD") @db.VarChar(3)
   status      DealStatus  @default(PENDING)
+  resolvedBy  Int?        @map("resolved_by")
+  resolvedAt  DateTime?   @map("resolved_at")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
   buyer    User      @relation("BuyerDeals", fields: [buyerId], references: [id])
   seller   User      @relation("SellerDeals", fields: [sellerId], references: [id])
+  resolver User?     @relation("ResolvedDeals", fields: [resolvedBy], references: [id])
   payments Payment[]
 
   @@map("deals")
@@ -75,6 +79,21 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model WebhookEvent {
+  id              Int      @id @default(autoincrement())
+  provider        String
+  eventId         String   @unique @map("event_id")
+  eventType       String   @map("event_type")
+  payload         Json
+  signature       String?
+  processed       Boolean  @default(false)
+  processedAt     DateTime? @map("processed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([provider, eventId])
+  @@map("webhook_events")
 }
 
 enum UserRole {

@@ -7,6 +7,8 @@ import { HealthModule } from './modules/health/health.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { DealsModule } from './modules/deals/deals.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { PaymentsModule } from './modules/payments/payments.module';
     DatabaseModule,
     DealsModule,
     PaymentsModule,
+    WebhooksModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
