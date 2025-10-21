@@ -56,6 +56,17 @@ export class TelegramService {
     });
   }
 
+  /**
+   * Send message to admin chat (for error alerts, etc)
+   */
+  async sendMessage(message: string): Promise<{ success: boolean; messageId?: number }> {
+    return this.telegramAdapter.sendMessage({
+      chatId: this.adminChatId,
+      text: message,
+      parseMode: 'HTML',
+    });
+  }
+
   @OnEvent('dispute.opened')
   async handleDisputeOpened(event: DisputeOpenedEvent): Promise<void> {
     this.logger.log(`Notifying admin about dispute for deal #${event.dealId}`);

@@ -1,6 +1,8 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma.module';
@@ -13,7 +15,10 @@ import { AdminModule } from './modules/admin/admin.module';
 import { FraudModule } from './hooks/kyc_fraud/fraud.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { KycModule } from './modules/kyc/kyc.module';
-import { AuditMiddleware } from './middleware/audit.middleware';
+import { AuditModule } from './modules/audit/audit.module';
+import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { RateLimitMiddleware } from './middleware/rate-limit.middleware';
 
 @Module({
   imports: [
@@ -21,7 +26,18 @@ import { AuditMiddleware } from './middleware/audit.middleware';
       isGlobal: true,
     }),
     EventEmitterModule.forRoot(),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: 60000,
+          limit: config.get('RATE_LIMIT_GUEST', 20),
+        },
+      ],
+    }),
     PrismaModule,
+    AuditModule,
     HealthModule,
     DatabaseModule,
     DealsModule,
@@ -33,10 +49,20 @@ import { AuditMiddleware } from './middleware/audit.middleware';
     KycModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuditMiddleware).forRoutes('*');
+    consumer.apply(RateLimitMiddleware).forRoutes('*');
   }
 }
