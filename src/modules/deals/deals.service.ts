@@ -1,8 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
+import { KycService } from '../kyc/kyc.service';
 import { CreateDealDto } from './dto';
 import { DealStatus } from '@prisma/client';
 
@@ -12,6 +13,7 @@ export class DealsService {
     private prisma: PrismaService,
     private paymentsService: PaymentsService,
     private fraudService: FraudService,
+    private kycService: KycService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -36,6 +38,16 @@ export class DealsService {
   };
 
   async createDeal(createDealDto: CreateDealDto) {
+    // KYC Pre-check: Verify user can create deal
+    const kycCheck = await this.kycService.canUserCreateDeal(
+      createDealDto.buyerId,
+      Number(createDealDto.amount),
+    );
+
+    if (!kycCheck.allowed) {
+      throw new ForbiddenException(kycCheck.reason || 'KYC verification required');
+    }
+
     const fraudCheck = await this.fraudService.checkDealCreation(
       createDealDto.buyerId,
       Number(createDealDto.amount),
