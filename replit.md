@@ -3,8 +3,8 @@
 ## Overview
 This project is a NestJS-based backend API for an escrow platform, built with TypeScript. Its purpose is to facilitate secure escrow transactions with a focus on a robust state machine, payment integration, administrative dispute resolution, and comprehensive security & audit controls. The platform aims to provide a reliable foundation for safe deal management.
 
-**Current Version**: v1.2  
-**Current State**: Step 8 Complete - Notifications & Integrations  
+**Current Version**: v1.3  
+**Current State**: Step 9 Complete - KYC & User Verification  
 **Last Updated**: October 21, 2025
 
 ## User Preferences
@@ -22,14 +22,29 @@ Key features and architectural decisions include:
 - **Payment Integration**: A dedicated Payments module handles payment operations (hold, capture, refund) via an adapter pattern, currently with a MockPaymentAdapter.
 - **Webhooks**: A WebhooksModule processes payment provider callbacks, ensuring idempotency and signature verification.
 - **Admin Arbitration**: An AdminModule provides functionality for manual dispute resolution by authorized administrators/moderators, including actions to complete, refund, or cancel deals.
-- **Notifications System**: Email and Telegram notification modules with event-driven architecture using NestJS EventEmitter2. Supports deal.created, deal.released, dispute.opened events.
-- **Audit Logging**: All significant state transitions, HTTP requests, fraud checks, and notifications are logged to an `audit_logs` table with IP address, user agent, and action context.
+- **Notifications System**: Email and Telegram notification modules with event-driven architecture using NestJS EventEmitter2. Supports deal.created, deal.released, dispute.opened, kyc.verified, kyc.rejected events.
+- **KYC & User Verification**: KycModule implements identity verification with MockKycProvider (deterministic risk scoring), transaction limits enforcement ($500 for UNVERIFIED, $10,000 for VERIFIED), and pre-check hooks in DealsService to block unauthorized transactions.
+- **Audit Logging**: All significant state transitions, HTTP requests, fraud checks, notifications, and KYC events are logged to an `audit_logs` table with IP address, user agent, and action context.
 - **Fraud Detection**: FraudService provides mock anti-fraud checks for user signup, deal creation, and payment holds, with risk scoring and automatic blocking of high-risk transactions.
 - **Encryption**: Sensitive data encryption utilities using AES-256-GCM (ENCRYPTION_KEY stored in Replit Secrets).
-- **Security**: Password hashes are excluded from API responses, DTO validation applied, audit middleware logs all requests, fraud detection integrated.
-- **Database Schema**: Core tables include `users` (with roles), `deals`, `payments`, `webhook_events`, and `audit_logs` (with IP/user-agent tracking), with defined relationships.
+- **Security**: Password hashes are excluded from API responses, DTO validation applied, audit middleware logs all requests, fraud detection integrated, KYC verification enforced.
+- **Database Schema**: Core tables include `users` (with roles, kyc_status, risk_score), `deals`, `payments`, `webhook_events`, and `audit_logs` (with IP/user-agent tracking), with defined relationships.
 
 ## Recent Changes
+**Step 9 (October 21, 2025) - KYC & User Verification**:
+- Extended Prisma schema: kyc_status enum (UNVERIFIED, PENDING, VERIFIED, REJECTED), risk_score field added to users
+- Created KYC module with KycService, KycController, DTOs (SubmitKycDto, ApproveKycDto)
+- Implemented MockKycProvider with deterministic risk scoring (hash-based, 0-100 scale)
+- KYC workflow: users with risk score < 50 auto-approved to VERIFIED, ≥ 50 auto-rejected to REJECTED
+- Transaction limits enforced: UNVERIFIED/PENDING = $500, VERIFIED = $10,000, REJECTED = blocked
+- Pre-check hooks integrated in DealsService: blocks deal creation for users exceeding verification limits
+- Telegram notifications for KYC events: kyc.verified, kyc.rejected (sent to admin with Russian localization)
+- Comprehensive test coverage: 34 unit tests passing (KycService 13/13, MockKycProvider 4/4, FraudService 12/12 updated, KycController 5/5)
+- E2E tests: 15 tests passing (KYC submission flow 3/3, status retrieval 2/2, admin approval 3/3, deal restrictions 4/4, transaction limits 3/3)
+- API endpoints: POST /api/v1/kyc/submit, GET /api/v1/kyc/status/:userId, PATCH /api/v1/kyc/approve/:userId
+- Environment variables: FEATURE_KYC, KYC_MOCK_MODE, KYC_LIMIT_UNVERIFIED, KYC_LIMIT_VERIFIED
+- **Status**: Production-ready KYC verification infrastructure with transaction limits enforcement
+
 **Step 8 (October 21, 2025) - Notifications & Integrations**:
 - Installed @nestjs/event-emitter for event-driven architecture
 - Created NotificationsModule with email and Telegram submodules
