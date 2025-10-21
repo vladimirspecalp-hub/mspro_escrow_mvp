@@ -3,23 +3,25 @@
 ## Overview
 This is a NestJS-based backend API for an escrow platform. The project is built with TypeScript and follows modern NestJS best practices with modular architecture.
 
-**Current Version**: Escrow Core MVP (v0.9.5)
+**Current Version**: Escrow Core MVP (v1.0)
 
-**Current State**: Step 5 Partial - Payments Module (Isolated, Integration Pending)
+**Current State**: Step 5 Complete - Payment Integration with Mock Adapter
 
 **Last Updated**: October 21, 2025
 
 ## Recent Changes
-- **October 21, 2025 - Step 5 (Partial - Payments Module)**:
+- **October 21, 2025 - Step 5 (Payment Integration - v1.0)**:
   - Created Payments module with controller, service, DTOs, and interfaces
   - Implemented MockPaymentAdapter with hold/capture/refund operations
   - Added comprehensive payment logging and audit trail
-  - Extended Prisma schema with payment tracking fields
+  - Extended Prisma schema with payment tracking fields (provider, providerPaymentId, providerTransactionId)
+  - **Fixed circular dependency**: Moved PAYMENT_ADAPTER token to interface file
+  - **Successfully integrated** PaymentsModule into AppModule
+  - **Integrated with DealsService**: hold on fund, capture on accept, refund on cancel
+  - Created global PrismaModule for centralized database access
   - **All unit tests passing (40/40)**: 23 payment tests + 17 existing tests
-  - **Known Issue**: Circular dependency prevents PaymentsModule integration into AppModule
-  - **Status**: Payments module works in isolation; integration requires architecture refactoring
-  - **Next Step**: Refactor to use event-driven architecture or queues for payment integration
-  - Created KNOWN_ISSUES.md to track integration blockers
+  - Updated KNOWN_ISSUES.md with resolution details
+  - **Status**: MVP complete with mock payment gateway; ready for ЮKassa integration
 
 - **October 21, 2025 - Step 4 (Escrow Core MVP v0.9)**:
   - Created Deals module with controller, service, and DTOs

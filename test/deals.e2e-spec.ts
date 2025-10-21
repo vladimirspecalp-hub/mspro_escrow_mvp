@@ -21,6 +21,7 @@ describe('Deals (e2e)', () => {
     await app.init();
 
     await prisma.auditLog.deleteMany();
+    await prisma.payment.deleteMany();
     await prisma.deal.deleteMany();
     await prisma.user.deleteMany();
 
@@ -43,6 +44,7 @@ describe('Deals (e2e)', () => {
 
   afterAll(async () => {
     await prisma.auditLog.deleteMany();
+    await prisma.payment.deleteMany();
     await prisma.deal.deleteMany();
     await prisma.user.deleteMany();
     await app.close();

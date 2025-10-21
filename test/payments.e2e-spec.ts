@@ -46,6 +46,7 @@ describe('Payments E2E (Full Escrow Flow)', () => {
 
   afterAll(async () => {
     if (prisma) {
+      await prisma.auditLog.deleteMany();
       await prisma.payment.deleteMany();
       await prisma.deal.deleteMany();
       await prisma.user.deleteMany();
@@ -143,6 +144,15 @@ describe('Payments E2E (Full Escrow Flow)', () => {
       expect(response.body.providerStatus).toBeDefined();
       expect(response.body.providerStatus.status).toBe('captured');
     });
+
+    it('should get all payments', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/payments')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThan(0);
+    });
   });
 
   describe('Cancelled Deal Flow with Refund', () => {
@@ -191,14 +201,4 @@ describe('Payments E2E (Full Escrow Flow)', () => {
     });
   });
 
-  describe('Payments API', () => {
-    it('should get all payments', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/v1/payments')
-        .expect(200);
-
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThan(0);
-    });
-  });
 });
