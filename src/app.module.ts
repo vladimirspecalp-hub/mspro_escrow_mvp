@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma.module';
@@ -10,6 +11,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { FraudModule } from './hooks/kyc_fraud/fraud.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AuditMiddleware } from './middleware/audit.middleware';
 
 @Module({
@@ -17,6 +19,7 @@ import { AuditMiddleware } from './middleware/audit.middleware';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     HealthModule,
     DatabaseModule,
@@ -25,6 +28,7 @@ import { AuditMiddleware } from './middleware/audit.middleware';
     WebhooksModule,
     AdminModule,
     FraudModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

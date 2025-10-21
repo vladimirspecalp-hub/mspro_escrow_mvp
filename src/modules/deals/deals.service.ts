@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
@@ -11,6 +12,7 @@ export class DealsService {
     private prisma: PrismaService,
     private paymentsService: PaymentsService,
     private fraudService: FraudService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   private readonly STATE_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
@@ -87,6 +89,15 @@ export class DealsService {
         },
       },
     );
+
+    this.eventEmitter.emit('deal.created', {
+      dealId: deal.id,
+      buyerEmail: deal.buyer.email,
+      sellerEmail: deal.seller.email,
+      title: deal.title,
+      amount: Number(deal.amount),
+      currency: deal.currency,
+    });
 
     return deal;
   }
@@ -248,6 +259,29 @@ export class DealsService {
       newStatus,
       ...details,
     });
+
+    if (newStatus === 'COMPLETED') {
+      this.eventEmitter.emit('deal.released', {
+        dealId: updatedDeal.id,
+        buyerEmail: updatedDeal.buyer.email,
+        sellerEmail: updatedDeal.seller.email,
+        title: updatedDeal.title,
+        amount: Number(updatedDeal.amount),
+        currency: updatedDeal.currency,
+      });
+    }
+
+    if (newStatus === 'DISPUTED') {
+      const openedBy = userId === deal.buyerId ? 'buyer' : 'seller';
+      this.eventEmitter.emit('dispute.opened', {
+        dealId: updatedDeal.id,
+        buyerEmail: updatedDeal.buyer.email,
+        sellerEmail: updatedDeal.seller.email,
+        title: updatedDeal.title,
+        openedBy,
+        reason: details?.reason,
+      });
+    }
 
     return updatedDeal;
   }
