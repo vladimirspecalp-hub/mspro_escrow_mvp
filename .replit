@@ -30,5 +30,17 @@ outputType = "console"
 localPort = 3000
 externalPort = 80
 
+[[ports]]
+localPort = 38719
+externalPort = 3000
+
+[[ports]]
+localPort = 43897
+externalPort = 3001
+
+[[ports]]
+localPort = 46165
+externalPort = 3002
+
 [nix]
 channel = "stable-25_05"

@@ -3,6 +3,7 @@ import { PaymentsService } from './payments.service';
 import { PrismaService } from '../../prisma.service';
 import { MockPaymentAdapter } from './adapters/mock.adapter';
 import { PAYMENT_ADAPTER } from './adapters/payment-adapter.interface';
+import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
 import { NotFoundException } from '@nestjs/common';
 
 describe('PaymentsService', () => {
@@ -17,9 +18,22 @@ describe('PaymentsService', () => {
       findMany: jest.fn(),
       update: jest.fn(),
     },
+    deal: {
+      findUnique: jest.fn(),
+    },
     auditLog: {
       create: jest.fn(),
     },
+  };
+
+  const mockFraudService = {
+    checkPaymentHold: jest.fn().mockResolvedValue({
+      riskScore: 0.3,
+      isBlocked: false,
+      reasons: [],
+      checks: { emailCheck: true, amountCheck: true, velocityCheck: true },
+    }),
+    logFraudCheck: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,6 +47,10 @@ describe('PaymentsService', () => {
         {
           provide: PAYMENT_ADAPTER,
           useClass: MockPaymentAdapter,
+        },
+        {
+          provide: FraudService,
+          useValue: mockFraudService,
         },
       ],
     }).compile();

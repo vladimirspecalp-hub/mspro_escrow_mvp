@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DealsService } from './deals.service';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
+import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('DealsService', () => {
@@ -28,6 +29,16 @@ describe('DealsService', () => {
     auditLog: {
       create: jest.fn(),
     },
+  };
+
+  const mockFraudService = {
+    checkDealCreation: jest.fn().mockResolvedValue({
+      riskScore: 0.3,
+      isBlocked: false,
+      reasons: [],
+      checks: { emailCheck: true, amountCheck: true, velocityCheck: true },
+    }),
+    logFraudCheck: jest.fn(),
   };
 
   const mockDeal = {
@@ -57,6 +68,10 @@ describe('DealsService', () => {
         {
           provide: PaymentsService,
           useValue: mockPaymentsService,
+        },
+        {
+          provide: FraudService,
+          useValue: mockFraudService,
         },
       ],
     }).compile();
