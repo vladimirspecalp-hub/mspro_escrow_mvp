@@ -1,6 +1,7 @@
-import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Inject, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { IPaymentAdapter, PAYMENT_ADAPTER } from './adapters/payment-adapter.interface';
+import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
 
 @Injectable()
 export class PaymentsService {
@@ -9,10 +10,24 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(PAYMENT_ADAPTER) private readonly paymentAdapter: IPaymentAdapter,
+    private readonly fraudService: FraudService,
   ) {}
 
   async holdPayment(dealId: number, amount: number, currency: string) {
     this.logger.log(`Creating payment hold for deal ${dealId}: ${amount} ${currency}`);
+
+    const fraudCheck = await this.fraudService.checkPaymentHold(dealId, amount, currency);
+
+    await this.fraudService.logFraudCheck('payment_hold', dealId, fraudCheck);
+
+    if (fraudCheck.isBlocked) {
+      this.logger.warn(`Payment hold blocked for deal ${dealId}: ${fraudCheck.reasons.join(', ')}`);
+      throw new BadRequestException({
+        message: 'Payment blocked due to fraud detection',
+        riskScore: fraudCheck.riskScore,
+        reasons: fraudCheck.reasons,
+      });
+    }
 
     const holdResult = await this.paymentAdapter.hold(amount, currency, {
       dealId,
@@ -40,6 +55,10 @@ export class PaymentsService {
           amount,
           currency,
           provider_hold_id: holdResult.provider_hold_id,
+          fraudCheck: {
+            riskScore: fraudCheck.riskScore,
+            reasons: fraudCheck.reasons,
+          },
         },
       },
     });

@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
+import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
 import { CreateDealDto } from './dto';
 import { DealStatus } from '@prisma/client';
 
@@ -9,10 +10,12 @@ export class DealsService {
   constructor(
     private prisma: PrismaService,
     private paymentsService: PaymentsService,
+    private fraudService: FraudService,
   ) {}
 
   private readonly STATE_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
-    PENDING: ['FUNDED', 'CANCELLED'],
+    PENDING: ['FUNDED', 'CANCELLED', 'PENDING_REVIEW'],
+    PENDING_REVIEW: ['PENDING', 'CANCELLED'],
     FUNDED: ['IN_PROGRESS', 'CANCELLED'],
     IN_PROGRESS: ['COMPLETED', 'DISPUTED', 'CANCELLED'],
     DISPUTED: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
@@ -31,10 +34,25 @@ export class DealsService {
   };
 
   async createDeal(createDealDto: CreateDealDto) {
+    const fraudCheck = await this.fraudService.checkDealCreation(
+      createDealDto.buyerId,
+      Number(createDealDto.amount),
+      createDealDto.currency || 'USD',
+    );
+
+    await this.fraudService.logFraudCheck(
+      'deal_creation',
+      null,
+      fraudCheck,
+      createDealDto.buyerId,
+    );
+
+    const initialStatus = fraudCheck.isBlocked ? 'PENDING_REVIEW' : 'PENDING';
+
     const deal = await this.prisma.deal.create({
       data: {
         ...createDealDto,
-        status: 'PENDING',
+        status: initialStatus,
       },
       select: {
         id: true,
@@ -62,6 +80,11 @@ export class DealsService {
         title: deal.title,
         amount: deal.amount,
         status: deal.status,
+        fraudCheck: {
+          riskScore: fraudCheck.riskScore,
+          isBlocked: fraudCheck.isBlocked,
+          reasons: fraudCheck.reasons,
+        },
       },
     );
 
