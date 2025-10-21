@@ -67,14 +67,16 @@ model Payment {
 }
 
 model AuditLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int?     @map("user_id")
-  action    String
-  entity    String
-  entityId  Int?     @map("entity_id")
-  details   Json?
-  ipAddress String?  @map("ip_address")
-  createdAt DateTime @default(now()) @map("created_at")
+  id            Int      @id @default(autoincrement())
+  userId        Int?     @map("user_id")
+  action        String
+  entity        String
+  entityId      Int?     @map("entity_id")
+  details       Json?
+  ipAddress     String?  @map("ip_address")
+  userAgent     String?  @map("user_agent")
+  actionContext Json?    @map("action_context")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id])
 
@@ -104,6 +106,7 @@ enum UserRole {
 
 enum DealStatus {
   PENDING
+  PENDING_REVIEW
   FUNDED
   IN_PROGRESS
   DISPUTED
