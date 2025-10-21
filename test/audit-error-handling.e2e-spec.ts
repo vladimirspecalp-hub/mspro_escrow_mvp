@@ -134,17 +134,14 @@ describe('Audit & Error Handling E2E', () => {
     });
 
     it('should enforce rate limits for guest users', async () => {
-      const requests: Promise<any>[] = [];
+      const responses: any[] = [];
 
       for (let i = 0; i < 7; i++) {
-        requests.push(
-          request(app.getHttpServer())
-            .get('/health')
-            .set('X-Forwarded-For', '192.168.1.100'),
-        );
+        const res = await request(app.getHttpServer())
+          .get('/health')
+          .set('X-Forwarded-For', '192.168.1.100');
+        responses.push(res);
       }
-
-      const responses = await Promise.all(requests);
 
       const limitExceeded = responses.some((r) => r.status === 429);
       expect(limitExceeded).toBe(true);

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception.filter';
 import { TelegramService } from '../../modules/notifications/telegram/telegram.service';
+import { AuditService } from '../../modules/audit/audit.service';
 
 describe('HttpExceptionFilter', () => {
   let filter: HttpExceptionFilter;
@@ -13,6 +14,10 @@ describe('HttpExceptionFilter', () => {
 
   const mockTelegramService = {
     sendMessage: jest.fn().mockResolvedValue({ success: true }),
+  };
+
+  const mockAuditService = {
+    logHttpRequest: jest.fn().mockResolvedValue(undefined),
   };
 
   const mockConfigService = {
@@ -36,6 +41,10 @@ describe('HttpExceptionFilter', () => {
         {
           provide: TelegramService,
           useValue: mockTelegramService,
+        },
+        {
+          provide: AuditService,
+          useValue: mockAuditService,
         },
       ],
     }).compile();

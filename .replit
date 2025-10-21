@@ -34,5 +34,61 @@ externalPort = 80
 localPort = 9229
 externalPort = 3000
 
+[[ports]]
+localPort = 32991
+externalPort = 5000
+
+[[ports]]
+localPort = 33475
+externalPort = 3003
+
+[[ports]]
+localPort = 36407
+externalPort = 8081
+
+[[ports]]
+localPort = 36933
+externalPort = 3002
+
+[[ports]]
+localPort = 40569
+externalPort = 3001
+
+[[ports]]
+localPort = 41061
+externalPort = 8080
+
+[[ports]]
+localPort = 43579
+externalPort = 8099
+
+[[ports]]
+localPort = 44301
+externalPort = 6000
+
+[[ports]]
+localPort = 44475
+externalPort = 8008
+
+[[ports]]
+localPort = 44865
+externalPort = 8000
+
+[[ports]]
+localPort = 45215
+externalPort = 5173
+
+[[ports]]
+localPort = 45273
+externalPort = 9000
+
+[[ports]]
+localPort = 45447
+externalPort = 4200
+
+[[ports]]
+localPort = 45629
+externalPort = 6800
+
 [nix]
 channel = "stable-25_05"

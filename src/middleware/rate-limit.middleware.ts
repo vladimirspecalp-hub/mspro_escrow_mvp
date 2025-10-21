@@ -50,30 +50,32 @@ export class RateLimitMiddleware implements NestMiddleware {
       };
     }
 
-    info.count++;
-    this.storage.set(key, info);
+    const currentCount = info.count + 1;
 
-    res.setHeader('X-RateLimit-Limit', limit.toString());
-    res.setHeader('X-RateLimit-Remaining', Math.max(0, limit - info.count).toString());
-    res.setHeader('X-RateLimit-Reset', new Date(info.resetTime).toISOString());
-
-    if (info.count > limit) {
+    if (currentCount > limit) {
       const retryAfter = Math.ceil((info.resetTime - now) / 1000);
+      res.setHeader('X-RateLimit-Limit', limit.toString());
+      res.setHeader('X-RateLimit-Remaining', '0');
+      res.setHeader('X-RateLimit-Reset', new Date(info.resetTime).toISOString());
       res.setHeader('Retry-After', retryAfter.toString());
 
       this.logger.warn(
         `Rate limit exceeded for ${user ? `user ${user.id}` : 'guest'} (${key})`,
       );
 
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.TOO_MANY_REQUESTS,
-          message: 'Too many requests, please try again later',
-          retryAfter,
-        },
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+      return res.status(HttpStatus.TOO_MANY_REQUESTS).json({
+        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+        message: 'Too many requests, please try again later',
+        retryAfter,
+      });
     }
+
+    info.count = currentCount;
+    this.storage.set(key, info);
+
+    res.setHeader('X-RateLimit-Limit', limit.toString());
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, limit - info.count).toString());
+    res.setHeader('X-RateLimit-Reset', new Date(info.resetTime).toISOString());
 
     next();
   }

@@ -35,6 +35,8 @@ describe('RateLimitMiddleware', () => {
     next = jest.fn();
     res = {
       setHeader: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
     };
   });
 
@@ -66,12 +68,13 @@ describe('RateLimitMiddleware', () => {
         await middleware.use(req, res, next);
       }
 
-      await expect(middleware.use(req, res, next)).rejects.toThrow(HttpException);
-      await expect(middleware.use(req, res, next)).rejects.toThrow(
+      await middleware.use(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(HttpStatus.TOO_MANY_REQUESTS);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          response: expect.objectContaining({
-            statusCode: HttpStatus.TOO_MANY_REQUESTS,
-          }),
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          message: expect.any(String),
         }),
       );
     });
