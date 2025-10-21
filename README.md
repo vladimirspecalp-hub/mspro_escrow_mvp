@@ -3,7 +3,7 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 
 🔗 **Repository**: [github.com/vladimirspecalp-hub/mspro_escrow_mvp](https://github.com/vladimirspecalp-hub/mspro_escrow_mvp)
 
-📦 **Current Version**: **v1.2 - Notifications & Integrations**
+📦 **Current Version**: **v1.3 - KYC & User Verification**
 
 ## ✅ Step Progress
 - **Step 1** — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
@@ -14,11 +14,12 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - **Step 6** — Webhooks & Admin Arbitration — ✅ Completed
 - **Step 7** — Security & Audit Hardening — ✅ Completed
 - **Step 8** — Notifications & Integrations (Email + Telegram) — ✅ Completed
+- **Step 9** — KYC & User Verification (Identity verification, deal limits) — ✅ Completed
 
 ## 🗺️ Roadmap to v2.0
-- **Step 9** — ЮKassa Integration (Real Payment Gateway) — 📋 Planned
-- **Step 10** — Frontend Dashboard (Admin Panel) — 📋 Planned
-- **Step 11** — Crypto Gateway, Multi-currency — 📋 Planned
+- **Step 10** — ЮKassa Integration (Real Payment Gateway) — 📋 Planned
+- **Step 11** — Frontend Dashboard (Admin Panel) — 📋 Planned
+- **Step 12** — Crypto Gateway, Multi-currency — 📋 Planned
 
 ## 🧠 Architecture
 
@@ -40,6 +41,7 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - `admin` — Administrative dispute resolution ✅
 - `notifications` — Email (mocked) and **Telegram (live integration)** ✅
 - `fraud` — Anti-fraud and KYC checks (mocked) ✅
+- `kyc` — **KYC & User Verification (deal limits, risk scoring)** ✅
 
 ### Planned Modules
 - `crypto_gateway` — Cryptocurrency integration
@@ -126,6 +128,8 @@ The PostgreSQL database includes the following tables:
 | password_hash | VARCHAR | NOT NULL |
 | role | ENUM(USER, ADMIN, MODERATOR) | DEFAULT USER |
 | is_active | BOOLEAN | DEFAULT true |
+| **kyc_status** | ENUM(UNVERIFIED, PENDING, VERIFIED, REJECTED) | DEFAULT UNVERIFIED |
+| **risk_score** | INTEGER | DEFAULT 0 |
 | created_at | TIMESTAMP | DEFAULT now() |
 | updated_at | TIMESTAMP | AUTO UPDATE |
 
@@ -713,6 +717,217 @@ All state transitions are automatically logged to the `audit_logs` table with:
 - Previous and new status
 - Additional details (reason for disputes/cancellations)
 - Timestamp
+
+## 🔐 KYC & User Verification Flow
+
+The platform implements identity verification (KYC - Know Your Customer) to ensure secure transactions and prevent fraud. Users must verify their identity before creating deals, with transaction limits based on verification status.
+
+### KYC Statuses
+
+| Status | Description | Transaction Limit | Can Create Deals |
+|--------|-------------|-------------------|------------------|
+| `UNVERIFIED` | Initial status, no verification submitted | $500 USD | ❌ No (blocked above limit) |
+| `PENDING` | Verification in progress | $500 USD | ❌ No (blocked above limit) |
+| `VERIFIED` | Identity verified successfully | $10,000 USD | ✅ Yes (up to limit) |
+| `REJECTED` | Verification failed or rejected | $0 USD | ❌ No (completely blocked) |
+
+### KYC API Endpoints
+
+#### Submit KYC Verification
+
+Submit identity documents for verification.
+
+```http
+POST /api/v1/kyc/submit
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "documentType": "passport",
+  "documentNumber": "AB123456",
+  "address": "123 Main St, City",
+  "dateOfBirth": "1990-01-01"
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "status": "verified",
+  "riskScore": 30,
+  "kycStatus": "VERIFIED"
+}
+```
+
+**Behavior**:
+- Automatically processes verification using mock KYC provider
+- Users with risk score < 50 are auto-approved
+- Users with risk score ≥ 50 are rejected
+- Sends Telegram notification to admin on approval/rejection
+- Logs all actions to audit trail
+
+#### Get KYC Status
+
+Retrieve current KYC verification status for a user.
+
+```http
+GET /api/v1/kyc/status/:userId
+```
+
+**Response** (200 OK):
+```json
+{
+  "userId": 1,
+  "kycStatus": "VERIFIED",
+  "riskScore": 30,
+  "canCreateDeal": true,
+  "transactionLimit": 10000
+}
+```
+
+#### Admin: Approve/Reject KYC
+
+Manually approve or reject KYC verification (requires ADMIN or MODERATOR role).
+
+```http
+PATCH /api/v1/kyc/approve/:userId?adminId=2
+Content-Type: application/json
+
+{
+  "decision": "approve",
+  "reason": "Valid documents verified"
+}
+```
+
+**Request Parameters**:
+- `decision`: `"approve"` or `"reject"`
+- `reason` (optional): Explanation for decision
+
+**Response** (200 OK):
+```json
+{
+  "userId": 1,
+  "kycStatus": "VERIFIED",
+  "message": "User approved"
+}
+```
+
+### Deal Creation Pre-check
+
+Before creating a deal, the system automatically checks:
+
+1. **User KYC Status**:
+   - `REJECTED` → ❌ Blocked (403 Forbidden)
+   - `UNVERIFIED` / `PENDING` → ⚠️ Limited to $500
+   - `VERIFIED` → ✅ Allowed up to $10,000
+
+2. **Transaction Limit**:
+   - Compares deal amount against user's limit
+   - Returns 403 Forbidden if amount exceeds limit
+
+**Example Error Response** (403 Forbidden):
+```json
+{
+  "statusCode": 403,
+  "message": "Amount exceeds limit for UNVERIFIED status. Max: 500 USD"
+}
+```
+
+### Telegram Notifications
+
+The system sends Telegram notifications for KYC events:
+
+#### KYC Verified
+```
+✅ KYC ВЕРИФИКАЦИЯ ОДОБРЕНА
+
+Пользователь: john_doe (john@example.com)
+ID пользователя: #123
+Оценка риска: 30/100
+Статус: Верифицирован
+
+Пользователь теперь может создавать сделки до 10,000 USD.
+```
+
+#### KYC Rejected
+```
+❌ KYC ВЕРИФИКАЦИЯ ОТКЛОНЕНА
+
+Пользователь: john_doe (john@example.com)
+ID пользователя: #123
+Оценка риска: 85/100
+Причина: High risk score detected
+
+Статус: Отклонено. Пользователь не может создавать сделки.
+```
+
+### Risk Scoring
+
+The mock KYC provider calculates a deterministic risk score (0-100) based on the document number:
+
+- **Score < 50**: ✅ Auto-approved, status = `VERIFIED`
+- **Score ≥ 50**: ❌ Auto-rejected, status = `REJECTED`
+
+This scoring is deterministic, meaning the same document number always produces the same risk score for consistent testing.
+
+### Environment Variables
+
+```env
+# KYC Configuration
+FEATURE_KYC=true
+KYC_MOCK_MODE=true
+KYC_LIMIT_UNVERIFIED=500
+KYC_LIMIT_VERIFIED=10000
+```
+
+### Testing KYC Flow
+
+**Example Test Scenarios**:
+
+1. **Successful Verification** (Low Risk):
+```bash
+curl -X POST http://localhost:3000/api/v1/kyc/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": "Alice Test",
+    "documentType": "passport",
+    "documentNumber": "LOWRISK123",
+    "address": "123 Test St",
+    "dateOfBirth": "1990-01-01"
+  }'
+```
+
+2. **Failed Verification** (High Risk):
+```bash
+curl -X POST http://localhost:3000/api/v1/kyc/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": "Bob Test",
+    "documentType": "passport",
+    "documentNumber": "HIGHRISK999",
+    "address": "456 Test Ave",
+    "dateOfBirth": "1985-05-15"
+  }'
+```
+
+3. **Check KYC Status**:
+```bash
+curl http://localhost:3000/api/v1/kyc/status/1
+```
+
+4. **Test Deal Creation with Unverified User**:
+```bash
+# Should fail with 403 Forbidden if amount > $500
+curl -X POST http://localhost:3000/api/v1/deals \
+  -H "Content-Type: application/json" \
+  -d '{
+    "buyerId": 1,
+    "sellerId": 2,
+    "title": "High Value Deal",
+    "amount": 1000,
+    "currency": "USD"
+  }'
+```
 
 ## 📝 Environment Variables
 
