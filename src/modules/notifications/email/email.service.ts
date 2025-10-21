@@ -45,16 +45,16 @@ export class EmailService {
 
     await this.emailAdapter.sendEmail({
       to: event.buyerEmail,
-      subject: `Deal Created: ${event.title}`,
-      text: `Your escrow deal "${event.title}" has been created. Amount: ${event.amount} ${event.currency}. Please wait for seller confirmation.`,
-      html: `<p>Your escrow deal <strong>"${event.title}"</strong> has been created.</p><p>Amount: <strong>${event.amount} ${event.currency}</strong></p><p>Please wait for seller confirmation.</p>`,
+      subject: `Сделка создана: ${event.title}`,
+      text: `Ваша сделка "${event.title}" создана. Сумма: ${event.amount} ${event.currency}. Ожидайте подтверждения продавца.`,
+      html: `<p>Ваша сделка <strong>"${event.title}"</strong> создана.</p><p>Сумма: <strong>${event.amount} ${event.currency}</strong></p><p>Ожидайте подтверждения продавца.</p>`,
     });
 
     await this.emailAdapter.sendEmail({
       to: event.sellerEmail,
-      subject: `New Deal Request: ${event.title}`,
-      text: `You have received a new escrow deal request: "${event.title}". Amount: ${event.amount} ${event.currency}. Please review and accept.`,
-      html: `<p>You have received a new escrow deal request: <strong>"${event.title}"</strong></p><p>Amount: <strong>${event.amount} ${event.currency}</strong></p><p>Please review and accept.</p>`,
+      subject: `Новый запрос сделки: ${event.title}`,
+      text: `Вы получили новый запрос сделки: "${event.title}". Сумма: ${event.amount} ${event.currency}. Пожалуйста, проверьте и примите.`,
+      html: `<p>Вы получили новый запрос сделки: <strong>"${event.title}"</strong></p><p>Сумма: <strong>${event.amount} ${event.currency}</strong></p><p>Пожалуйста, проверьте и примите.</p>`,
     });
 
     await this.logNotification('email', 'deal.created', event.dealId, {
@@ -68,16 +68,16 @@ export class EmailService {
 
     await this.emailAdapter.sendEmail({
       to: event.sellerEmail,
-      subject: `Funds Released: ${event.title}`,
-      text: `The escrow funds for "${event.title}" have been released to you. Amount: ${event.amount} ${event.currency}.`,
-      html: `<p>The escrow funds for <strong>"${event.title}"</strong> have been released to you.</p><p>Amount: <strong>${event.amount} ${event.currency}</strong></p>`,
+      subject: `Средства переведены: ${event.title}`,
+      text: `Средства эскроу для сделки "${event.title}" переведены вам. Сумма: ${event.amount} ${event.currency}.`,
+      html: `<p>Средства эскроу для сделки <strong>"${event.title}"</strong> переведены вам.</p><p>Сумма: <strong>${event.amount} ${event.currency}</strong></p>`,
     });
 
     await this.emailAdapter.sendEmail({
       to: event.buyerEmail,
-      subject: `Deal Completed: ${event.title}`,
-      text: `Your escrow deal "${event.title}" has been completed successfully. Funds released to seller.`,
-      html: `<p>Your escrow deal <strong>"${event.title}"</strong> has been completed successfully.</p><p>Funds released to seller.</p>`,
+      subject: `Сделка завершена: ${event.title}`,
+      text: `Ваша сделка "${event.title}" успешно завершена. Средства переведены продавцу.`,
+      html: `<p>Ваша сделка <strong>"${event.title}"</strong> успешно завершена.</p><p>Средства переведены продавцу.</p>`,
     });
 
     await this.logNotification('email', 'deal.released', event.dealId, {
@@ -90,12 +90,13 @@ export class EmailService {
     this.logger.log(`Handling dispute.opened event for deal #${event.dealId}`);
 
     const otherPartyEmail = event.openedBy === 'buyer' ? event.sellerEmail : event.buyerEmail;
+    const openedByText = event.openedBy === 'buyer' ? 'покупатель' : 'продавец';
 
     await this.emailAdapter.sendEmail({
       to: otherPartyEmail,
-      subject: `Dispute Opened: ${event.title}`,
-      text: `A dispute has been opened for deal "${event.title}". The ${event.openedBy} has raised a concern. An administrator will review the case.`,
-      html: `<p>A dispute has been opened for deal <strong>"${event.title}"</strong>.</p><p>The <strong>${event.openedBy}</strong> has raised a concern.</p><p>An administrator will review the case.</p>`,
+      subject: `Открыт спор: ${event.title}`,
+      text: `Был открыт спор по сделке "${event.title}". ${openedByText.charAt(0).toUpperCase() + openedByText.slice(1)} выразил претензию. Администратор рассмотрит дело.`,
+      html: `<p>Был открыт спор по сделке <strong>"${event.title}"</strong>.</p><p><strong>${openedByText.charAt(0).toUpperCase() + openedByText.slice(1)}</strong> выразил претензию.</p><p>Администратор рассмотрит дело.</p>`,
     });
 
     await this.logNotification('email', 'dispute.opened', event.dealId, {

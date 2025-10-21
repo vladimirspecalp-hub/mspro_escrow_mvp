@@ -57,9 +57,9 @@ describe('TelegramService', () => {
 
       const sentMessages = telegramAdapter.getSentMessages();
       expect(sentMessages).toHaveLength(1);
-      expect(sentMessages[0].text).toContain('DISPUTE OPENED');
+      expect(sentMessages[0].text).toContain('ОТКРЫТ СПОР');
       expect(sentMessages[0].text).toContain('Disputed Deal');
-      expect(sentMessages[0].text).toContain('buyer');
+      expect(sentMessages[0].text).toContain('покупатель');
       expect(sentMessages[0].parseMode).toBe('HTML');
     });
 
@@ -101,7 +101,7 @@ describe('TelegramService', () => {
 
       const sentMessages = telegramAdapter.getSentMessages();
       expect(sentMessages).toHaveLength(1);
-      expect(sentMessages[0].text).toContain('NEW DEAL CREATED');
+      expect(sentMessages[0].text).toContain('СОЗДАНА НОВАЯ СДЕЛКА');
       expect(sentMessages[0].text).toContain('New Deal');
       expect(sentMessages[0].text).toContain('500 USD');
       expect(sentMessages[0].parseMode).toBe('HTML');

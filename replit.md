@@ -41,10 +41,11 @@ Key features and architectural decisions include:
 - **Telegram Integration**: Live bot (@MSPro_Escrow_Bot) sending real notifications
 - **Secrets configured**: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 - **Test endpoint**: POST /test/telegram for manual testing
+- **Russian Localization**: All notification texts (email & Telegram) fully localized to Russian
 - **All unit tests passing (91/91)**: email service 6/6, telegram service 4/4, existing 81/81
 - **E2E tests**: Notifications 6/6 passing ✅ (full deal lifecycle: create -> fund -> confirm -> accept with notifications)
-- **Live test**: Message ID #11 delivered successfully to Telegram ✅
-- **Status**: Production-ready notification infrastructure (Email ready for Resend/SendGrid, Telegram LIVE)
+- **Live tests**: Messages #11-15 delivered successfully to Telegram ✅
+- **Status**: Production-ready notification infrastructure (Email ready for Resend/SendGrid, Telegram LIVE, Russian UI)
 
 **Step 7 (October 21, 2025) - Security & Audit Hardening**:
 - Created crypto.util.ts with AES-256-GCM encryption/decryption utilities

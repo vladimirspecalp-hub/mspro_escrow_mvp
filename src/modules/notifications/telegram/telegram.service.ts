@@ -45,17 +45,18 @@ export class TelegramService {
   async handleDisputeOpened(event: DisputeOpenedEvent): Promise<void> {
     this.logger.log(`Notifying admin about dispute for deal #${event.dealId}`);
 
+    const openedByText = event.openedBy === 'buyer' ? 'покупатель' : 'продавец';
     const message = `
-🚨 <b>DISPUTE OPENED</b>
+🚨 <b>ОТКРЫТ СПОР</b>
 
-Deal: ${event.title}
-Deal ID: #${event.dealId}
-Opened by: ${event.openedBy}
-Buyer: ${event.buyerEmail}
-Seller: ${event.sellerEmail}
-${event.reason ? `Reason: ${event.reason}` : ''}
+Сделка: ${event.title}
+ID сделки: #${event.dealId}
+Открыл: ${openedByText}
+Покупатель: ${event.buyerEmail}
+Продавец: ${event.sellerEmail}
+${event.reason ? `Причина: ${event.reason}` : ''}
 
-Action required: Please review and resolve the dispute.
+Требуется действие: Пожалуйста, рассмотрите и решите спор.
     `.trim();
 
     await this.telegramAdapter.sendMessage({
@@ -75,13 +76,13 @@ Action required: Please review and resolve the dispute.
     this.logger.log(`Notifying admin about new deal #${event.dealId}`);
 
     const message = `
-📋 <b>NEW DEAL CREATED</b>
+📋 <b>СОЗДАНА НОВАЯ СДЕЛКА</b>
 
-Deal: ${event.title}
-Deal ID: #${event.dealId}
-Amount: ${event.amount} ${event.currency}
-Buyer: ${event.buyerEmail}
-Seller: ${event.sellerEmail}
+Сделка: ${event.title}
+ID сделки: #${event.dealId}
+Сумма: ${event.amount} ${event.currency}
+Покупатель: ${event.buyerEmail}
+Продавец: ${event.sellerEmail}
     `.trim();
 
     await this.telegramAdapter.sendMessage({

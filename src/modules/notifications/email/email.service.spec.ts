@@ -58,9 +58,9 @@ describe('EmailService', () => {
       const sentEmails = emailAdapter.getSentEmails();
       expect(sentEmails).toHaveLength(2);
       expect(sentEmails[0].to).toBe('buyer@test.com');
-      expect(sentEmails[0].subject).toContain('Deal Created');
+      expect(sentEmails[0].subject).toContain('Сделка создана');
       expect(sentEmails[1].to).toBe('seller@test.com');
-      expect(sentEmails[1].subject).toContain('New Deal Request');
+      expect(sentEmails[1].subject).toContain('Новый запрос сделки');
     });
 
     it('should log notification to audit', async () => {
@@ -103,9 +103,9 @@ describe('EmailService', () => {
       const sentEmails = emailAdapter.getSentEmails();
       expect(sentEmails).toHaveLength(2);
       expect(sentEmails[0].to).toBe('seller@test.com');
-      expect(sentEmails[0].subject).toContain('Funds Released');
+      expect(sentEmails[0].subject).toContain('Средства переведены');
       expect(sentEmails[1].to).toBe('buyer@test.com');
-      expect(sentEmails[1].subject).toContain('Deal Completed');
+      expect(sentEmails[1].subject).toContain('Сделка завершена');
     });
 
     it('should log notification to audit', async () => {
@@ -148,7 +148,7 @@ describe('EmailService', () => {
       const sentEmails = emailAdapter.getSentEmails();
       expect(sentEmails).toHaveLength(1);
       expect(sentEmails[0].to).toBe('seller@test.com');
-      expect(sentEmails[0].subject).toContain('Dispute Opened');
+      expect(sentEmails[0].subject).toContain('Открыт спор');
     });
 
     it('should send email to buyer when seller opens dispute', async () => {
