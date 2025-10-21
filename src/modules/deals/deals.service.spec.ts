@@ -3,12 +3,14 @@ import { DealsService } from './deals.service';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('DealsService', () => {
   let service: DealsService;
   let prisma: PrismaService;
   let paymentsService: PaymentsService;
+  let eventEmitter: EventEmitter2;
 
   const mockPaymentsService = {
     holdPayment: jest.fn(),
@@ -39,6 +41,10 @@ describe('DealsService', () => {
       checks: { emailCheck: true, amountCheck: true, velocityCheck: true },
     }),
     logFraudCheck: jest.fn(),
+  };
+
+  const mockEventEmitter = {
+    emit: jest.fn(),
   };
 
   const mockDeal = {
@@ -73,12 +79,17 @@ describe('DealsService', () => {
           provide: FraudService,
           useValue: mockFraudService,
         },
+        {
+          provide: EventEmitter2,
+          useValue: mockEventEmitter,
+        },
       ],
     }).compile();
 
     service = module.get<DealsService>(DealsService);
     prisma = module.get<PrismaService>(PrismaService);
     paymentsService = module.get<PaymentsService>(PaymentsService);
+    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
 
     jest.clearAllMocks();
   });
