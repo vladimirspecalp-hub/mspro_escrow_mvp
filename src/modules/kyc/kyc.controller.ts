@@ -23,11 +23,15 @@ export class KycController {
   /**
    * POST /api/v1/kyc/submit
    * Submit KYC verification request
+   * 
+   * TODO: Add authentication guard before production
+   * This endpoint currently accepts requests without authentication and defaults to userId=1.
+   * Requires implementation of AuthGuard with proper JWT/session verification.
    */
   @Post('submit')
   @HttpCode(HttpStatus.OK)
   async submitKyc(@Body() dto: SubmitKycDto, @Request() req: any) {
-    const userId = req.user?.userId || 1; // Mock user ID for testing
+    const userId = req.user?.userId || 1; // TODO: Remove fallback after auth implementation
     return this.kycService.submitKyc(userId, dto);
   }
 

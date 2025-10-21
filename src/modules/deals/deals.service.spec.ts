@@ -3,6 +3,7 @@ import { DealsService } from './deals.service';
 import { PrismaService } from '../../prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { FraudService } from '../../hooks/kyc_fraud/fraud.service';
+import { KycService } from '../kyc/kyc.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
@@ -48,6 +49,19 @@ describe('DealsService', () => {
     emitAsync: jest.fn().mockResolvedValue([]),
   };
 
+  const mockKycService = {
+    getKycStatus: jest.fn().mockResolvedValue({
+      kycStatus: 'VERIFIED',
+      riskScore: 30,
+      canCreateDeal: true,
+      transactionLimit: 10000,
+    }),
+    canUserCreateDeal: jest.fn().mockResolvedValue({
+      allowed: true,
+      reason: null,
+    }),
+  };
+
   const mockDeal = {
     id: 1,
     buyerId: 1,
@@ -79,6 +93,10 @@ describe('DealsService', () => {
         {
           provide: FraudService,
           useValue: mockFraudService,
+        },
+        {
+          provide: KycService,
+          useValue: mockKycService,
         },
         {
           provide: EventEmitter2,

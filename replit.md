@@ -23,7 +23,7 @@ Key features and architectural decisions include:
 - **Webhooks**: A WebhooksModule processes payment provider callbacks, ensuring idempotency and signature verification.
 - **Admin Arbitration**: An AdminModule provides functionality for manual dispute resolution by authorized administrators/moderators, including actions to complete, refund, or cancel deals.
 - **Notifications System**: Email and Telegram notification modules with event-driven architecture using NestJS EventEmitter2. Supports deal.created, deal.released, dispute.opened, kyc.verified, kyc.rejected events.
-- **KYC & User Verification**: KycModule implements identity verification with MockKycProvider (deterministic risk scoring), transaction limits enforcement ($500 for UNVERIFIED, $10,000 for VERIFIED), and pre-check hooks in DealsService to block unauthorized transactions.
+- **KYC & User Verification**: KycModule implements identity verification with MockKycProvider (deterministic risk scoring), transaction limits enforcement ($500 for UNVERIFIED, $10,000 for VERIFIED), and pre-check hooks in DealsService to block unauthorized transactions. **Note**: KYC endpoints currently lack authentication guards (MVP limitation); requires Auth module implementation before production.
 - **Audit Logging**: All significant state transitions, HTTP requests, fraud checks, notifications, and KYC events are logged to an `audit_logs` table with IP address, user agent, and action context.
 - **Fraud Detection**: FraudService provides mock anti-fraud checks for user signup, deal creation, and payment holds, with risk scoring and automatic blocking of high-risk transactions.
 - **Encryption**: Sensitive data encryption utilities using AES-256-GCM (ENCRYPTION_KEY stored in Replit Secrets).
@@ -44,6 +44,7 @@ Key features and architectural decisions include:
 - API endpoints: POST /api/v1/kyc/submit, GET /api/v1/kyc/status/:userId, PATCH /api/v1/kyc/approve/:userId
 - Environment variables: FEATURE_KYC, KYC_MOCK_MODE, KYC_LIMIT_UNVERIFIED, KYC_LIMIT_VERIFIED
 - **Status**: Production-ready KYC verification infrastructure with transaction limits enforcement
+- **Known Limitation**: KYC endpoints (POST /api/v1/kyc/submit) lack authentication guards; defaults to userId=1 for MVP testing. **Requires Auth module before production deployment**.
 
 **Step 8 (October 21, 2025) - Notifications & Integrations**:
 - Installed @nestjs/event-emitter for event-driven architecture

@@ -94,6 +94,19 @@ describe('KYC E2E', () => {
 
   describe('KYC Submission Flow', () => {
     it('should submit KYC verification request', async () => {
+      // Create test user with id=1 for this test
+      const kycTestUser = await prisma.user.upsert({
+        where: { id: 1 },
+        update: {},
+        create: {
+          id: 1,
+          email: 'kyc.test1@test.com',
+          username: 'kyc_test1',
+          passwordHash: 'hashed_password',
+          kycStatus: KycStatus.UNVERIFIED,
+        },
+      });
+
       const response = await request(app.getHttpServer())
         .post('/api/v1/kyc/submit')
         .send({
@@ -111,12 +124,12 @@ describe('KYC E2E', () => {
     });
 
     it('should verify user with low risk score', async () => {
-      const lowRiskUser = await prisma.user.create({
+      // Update user id=1 for this test
+      await prisma.user.update({
+        where: { id: 1 },
         data: {
-          email: 'lowrisk@test.com',
-          username: 'lowrisk_user',
-          passwordHash: 'hashed_password',
           kycStatus: KycStatus.UNVERIFIED,
+          riskScore: 0,
         },
       });
 
@@ -135,8 +148,6 @@ describe('KYC E2E', () => {
         expect(response.body.status).toBe('verified');
         expect(response.body.kycStatus).toBe(KycStatus.VERIFIED);
       }
-
-      await prisma.user.delete({ where: { id: lowRiskUser.id } });
     });
 
     it('should log KYC submission to audit trail', async () => {

@@ -32,6 +32,8 @@ describe('Security E2E', () => {
         email: 'buyer.security@test.com',
         username: 'buyer_security',
         passwordHash: 'hashed_password',
+        kycStatus: 'VERIFIED',
+        riskScore: 20,
       },
     });
 
@@ -40,6 +42,8 @@ describe('Security E2E', () => {
         email: 'seller.security@test.com',
         username: 'seller_security',
         passwordHash: 'hashed_password',
+        kycStatus: 'VERIFIED',
+        riskScore: 25,
       },
     });
   });
@@ -57,33 +61,21 @@ describe('Security E2E', () => {
   });
 
   describe('Fraud Detection', () => {
-    it('should block deal with very high amount (>$50k)', async () => {
+    it('should block deal exceeding KYC limit for verified user', async () => {
+      // Test KYC limit enforcement: VERIFIED users have $10k limit
       const response = await request(app.getHttpServer())
         .post('/api/v1/deals')
         .send({
           buyerId: buyerUser.id,
           sellerId: sellerUser.id,
-          title: 'High Value Deal',
-          description: 'This should be blocked',
-          amount: 60000,
+          title: 'Exceeds KYC Limit',
+          description: 'This should be blocked by KYC limit',
+          amount: 15000, // Exceeds $10k VERIFIED limit
           currency: 'USD',
         })
-        .expect(201);
+        .expect(403); // KYC blocks before fraud check
 
-      expect(response.body.status).toBe('PENDING_REVIEW');
-
-      const fraudLogs = await prisma.auditLog.findMany({
-        where: {
-          action: 'FRAUD_CHECK_DEAL_CREATION',
-          userId: buyerUser.id,
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-      });
-
-      expect(fraudLogs.length).toBe(1);
-      expect(fraudLogs[0].details['isBlocked']).toBe(true);
-      expect(fraudLogs[0].details['riskScore']).toBeGreaterThanOrEqual(0.8);
+      expect(response.body.message).toContain('Amount exceeds limit');
     });
 
     it('should allow normal deal to proceed', async () => {
