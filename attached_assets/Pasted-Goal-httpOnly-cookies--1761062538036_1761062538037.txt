@@ -1,0 +1,111 @@
+Goal
+Реализовать систему авторизации и контекст пользователя с использованием httpOnly cookies, защищённых от XSS, и управлением ролями (USER / ADMIN).
+
+⚙️ Tasks
+
+Создать модуль авторизации
+
+src/app/auth/
+ ├── login/page.tsx
+ ├── register/page.tsx
+ ├── hooks/useAuth.ts
+ ├── context/AuthContext.tsx
+ ├── components/AuthForm.tsx
+
+
+Backend интеграция (cookie-auth)
+
+При логине backend выдаёт cookie:
+
+res.cookie('token', jwt, {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+res.send({ success: true, user });
+
+
+Frontend-запрос:
+
+await fetch(`${API_BASE}/auth/login`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password }),
+  credentials: 'include',
+});
+
+
+Для последующих API-вызовов также:
+
+fetch(`${API_BASE}/api/v1/deals`, { credentials: 'include' });
+
+
+AuthContext
+📁 src/context/AuthContext.tsx
+
+использовать React Context + useReducer
+
+состояние:
+
+{ user: User | null; loading: boolean; }
+
+
+методы:
+
+login(email, password)
+
+logout() → очищает cookie через API logout
+
+getCurrentUser() → GET /auth/me (сервер возвращает user из cookie)
+
+Защищённые маршруты
+📁 src/hooks/useProtectedRoute.ts
+
+редиректит на /auth/login, если !user.
+
+оборачивать приватные layout-ы (/deals, /admin) в ProtectedLayout.
+
+UI
+
+Формы на shadcn/ui (Input, Button, Card).
+
+При входе отображать имя пользователя в Header.
+
+Добавить Logout кнопку.
+
+CORS и cookie
+
+Убедиться, что backend включает:
+
+app.enableCors({
+  origin: 'https://frontend.mspro-ltd.ru',
+  credentials: true,
+});
+
+
+Документация
+
+В README описать, что токен хранится в httpOnly cookie.
+
+Добавить схему запросов /auth/login, /auth/me, /auth/logout.
+
+✅ Acceptance Criteria
+
+Пользователь может войти / выйти.
+
+Cookie создаётся (httpOnly + secure).
+
+Сессия восстанавливается после перезагрузки.
+
+/admin доступен только для role=ADMIN.
+
+README обновлён:
+
+## Step 2 — Auth & User Context ✅  
+Secure authentication via httpOnly cookies.
+
+
+📦 Commit message:
+
+Frontend Step 2: Implemented secure auth context with httpOnly cookies and protected routes

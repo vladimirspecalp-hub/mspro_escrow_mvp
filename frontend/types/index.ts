@@ -1,11 +1,12 @@
 export interface User {
   id: number
   email: string
-  name: string | null
+  name: string
+  phone: string | null
   role: 'ADMIN' | 'MODERATOR' | 'USER'
   kycStatus: 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED'
-  riskScore: number | null
-  createdAt: string
+  riskScore?: number | null
+  createdAt?: string
 }
 
 export interface Deal {
@@ -41,3 +42,13 @@ export interface ApiError {
   timestamp: string
   path: string
 }
+
+export interface AuthState {
+  user: User | null
+  loading: boolean
+}
+
+export type AuthAction =
+  | { type: 'SET_USER'; payload: User }
+  | { type: 'LOGOUT' }
+  | { type: 'SET_LOADING'; payload: boolean }
