@@ -1,11 +1,15 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
+import { PaymentsService } from '../payments/payments.service';
 import { CreateDealDto } from './dto';
 import { DealStatus } from '@prisma/client';
 
 @Injectable()
 export class DealsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private paymentsService: PaymentsService,
+  ) {}
 
   private readonly STATE_TRANSITIONS: Record<DealStatus, DealStatus[]> = {
     PENDING: ['FUNDED', 'CANCELLED'],
@@ -128,6 +132,8 @@ export class DealsService {
       throw new BadRequestException('Only buyer can accept the deal');
     }
 
+    await this.paymentsService.capturePayment(deal.id);
+
     return this.transitionState(deal.id, 'COMPLETED', userId, 'DEAL_ACCEPTED');
   }
 
@@ -148,6 +154,12 @@ export class DealsService {
       throw new BadRequestException('Only buyer can fund the deal');
     }
 
+    await this.paymentsService.holdPayment(
+      deal.id,
+      Number(deal.amount),
+      deal.currency,
+    );
+
     return this.transitionState(deal.id, 'FUNDED', userId, 'DEAL_FUNDED');
   }
 
@@ -156,6 +168,14 @@ export class DealsService {
 
     if (deal.buyerId !== userId && deal.sellerId !== userId) {
       throw new BadRequestException('Only deal participants can cancel');
+    }
+
+    const payments = await this.prisma.payment.findMany({
+      where: { dealId: deal.id },
+    });
+
+    if (payments.length > 0) {
+      await this.paymentsService.refundPayment(deal.id);
     }
 
     return this.transitionState(deal.id, 'CANCELLED', userId, 'DEAL_CANCELLED', { reason });
