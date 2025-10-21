@@ -3,11 +3,18 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 
 🔗 **Repository**: [github.com/vladimirspecalp-hub/mspro_escrow_mvp](https://github.com/vladimirspecalp-hub/mspro_escrow_mvp)
 
+📦 **Current Version**: **Escrow Core MVP (v0.9)**
+
 ## ✅ Step Progress
 - **Step 1** — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
 - **Step 2** — Repository Setup (GitHub sync, README, CI-ready) — ✅ Completed
 - **Step 3** — Database & ORM Setup (PostgreSQL + Prisma) — ✅ Completed
-- **Step 4** — Deals Module & State Machine — ✅ Completed
+- **Step 4** — Deals Module & State Machine (6-state MVP) — ✅ Completed (v0.9)
+
+## 🗺️ Roadmap to v1.0
+- **Step 5** — ЮKassa Integration (Payment Hold/Release) — 🔜 Next
+- **Step 6** — Extended State Machine & Arbitration — 📋 Planned
+- **Step 7+** — Crypto Gateway, Multi-currency, Advanced Features — 📋 Planned
 
 ## 🧠 Architecture
 
@@ -735,9 +742,10 @@ npx prisma db pull
 
 ## 📄 Changelog
 
-### Step 4 — Deals Module & State Machine (October 21, 2025)
+### Step 4 — Deals Module & State Machine (October 21, 2025) — **v0.9**
 - ✅ Created deals module with controller, service, and DTOs
-- ✅ Implemented state machine with 6 states (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
+- ✅ Implemented **6-state state machine** (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
+- ✅ **Design Decision**: Simplified state machine for MVP; full version planned for Step 6
 - ✅ Implemented state transition validation and enforcement
 - ✅ Created 8 API endpoints for deal management:
   - POST /api/v1/deals (createDeal)
@@ -750,10 +758,13 @@ npx prisma db pull
   - POST /api/v1/deals/:id/cancel (cancelDeal)
 - ✅ Integrated automatic audit logging for all state transitions
 - ✅ Added authorization checks (buyer-only, seller-only actions)
+- ✅ **Security fixes**: Excluded passwordHash from all API responses, added DTO validation
+- ✅ Enabled global ValidationPipe with whitelist and transformation
 - ✅ Created comprehensive unit tests (12 test cases)
 - ✅ Created e2e tests covering full deal lifecycle
 - ✅ All tests passing (26/26: 17 unit + 9 e2e)
 - ✅ Updated documentation with state machine flow and API reference
+- ✅ **Version locked as "Escrow Core MVP (v0.9)"** - ready for Step 5 integration
 
 ### Step 3 — Database & ORM Setup (October 21, 2025)
 - ✅ Configured PostgreSQL database via Replit integration
@@ -785,16 +796,39 @@ npx prisma db pull
 - ✅ Created modular structure with `src/modules/` directory
 - ✅ Configured development workflow with hot reload
 
-## 🛠️ Next Steps (Step 5+)
+## 🛠️ Roadmap: v0.9 → v1.0
 
-- [ ] Implement User module with CRUD operations
-- [ ] Add authentication and authorization (JWT)
-- [ ] Add Payment processing module
-- [ ] Implement Crypto Gateway integration
-- [ ] Add API documentation (Swagger/OpenAPI)
-- [ ] Implement WebSocket notifications for deal updates
-- [ ] Add dispute resolution workflow
-- [ ] Set up CI/CD pipeline
+### Step 5 — ЮKassa Integration (Payment Hold/Release)
+**Goal**: Integrate ЮKassa payment gateway with hold/release functionality
+- [ ] Configure ЮKassa API connection and credentials
+- [ ] Implement payment hold on deal creation
+- [ ] Implement payment release on deal completion
+- [ ] Add webhook handlers for payment status updates
+- [ ] Create Payment module with transaction tracking
+- [ ] Add User authentication (JWT-based)
+- [ ] Add role-based authorization guards
+- [ ] Write comprehensive tests for payment flows
+
+### Step 6 — Extended State Machine & Arbitration
+**Goal**: Expand state machine to full escrow workflow with arbitration
+- [ ] **New States**: DRAFT, PENDING_CONFIRMATION, RELEASED, CLOSED, REFUNDED, CANCELLED_BY_BUYER, CANCELLED_BY_SELLER
+- [ ] Database migration for extended states
+- [ ] Implement admin arbitration for DISPUTED deals
+- [ ] Add resolution workflows (refund, force-complete)
+- [ ] Create Admin panel endpoints
+- [ ] Add dispute resolution timeline tracking
+- [ ] Implement automated state transitions based on timeouts
+- [ ] WebSocket notifications for real-time updates
+
+### Step 7+ — Advanced Features
+- [ ] Crypto Gateway integration (Bitcoin, Ethereum, USDT)
+- [ ] Multi-currency support
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Rate limiting and security hardening
+- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] Docker containerization for production
+- [ ] Performance optimization and caching
+- [ ] Analytics and reporting dashboard
 
 ## 📄 Notes
 

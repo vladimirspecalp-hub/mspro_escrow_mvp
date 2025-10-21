@@ -3,21 +3,26 @@
 ## Overview
 This is a NestJS-based backend API for an escrow platform. The project is built with TypeScript and follows modern NestJS best practices with modular architecture.
 
-**Current State**: Step 4 Complete - Deals Module with State Machine implemented
+**Current Version**: Escrow Core MVP (v0.9)
+
+**Current State**: Step 4 Complete - Deals Module with 6-state State Machine
 
 **Last Updated**: October 21, 2025
 
 ## Recent Changes
-- **October 21, 2025 - Step 4**:
+- **October 21, 2025 - Step 4 (Escrow Core MVP v0.9)**:
   - Created Deals module with controller, service, and DTOs
-  - Implemented state machine with 6 states (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
+  - Implemented **6-state state machine** (PENDING, FUNDED, IN_PROGRESS, DISPUTED, COMPLETED, CANCELLED)
+  - **Design Decision**: Simplified state machine for MVP; full version planned for Step 6
   - Created 8 API endpoints for deal lifecycle management
   - Integrated automatic audit logging for all state transitions
   - Added authorization checks (buyer-only, seller-only actions)
+  - **Security fixes**: Excluded passwordHash from all API responses, added DTO validation
   - Created comprehensive unit tests (12 test cases for deals)
   - Created e2e tests covering full deal lifecycle
   - All tests passing (26 total: 17 unit + 9 e2e)
   - Updated README.md with state machine flow and API documentation
+  - **Version locked as "Escrow Core MVP (v0.9)"** - ready for Step 5 integration
   
 - **October 21, 2025 - Step 3**: 
   - Configured PostgreSQL database via Replit integration
@@ -221,15 +226,39 @@ Deal States: PENDING → FUNDED → IN_PROGRESS → COMPLETED
 
 **Audit Logging**: All transitions logged to `audit_logs` table
 
-## Next Steps (Step 5+)
-- Implement User module with CRUD operations and authentication
-- Add JWT-based authentication and role-based authorization
-- Add Payment processing module with transaction tracking
-- Implement Crypto Gateway integration (crypto payments)
-- Add API documentation (Swagger/OpenAPI)
-- Implement WebSocket notifications for real-time updates
-- Add dispute resolution workflow with admin arbitration
-- Set up CI/CD pipeline (GitHub Actions)
+## Roadmap (v0.9 → v1.0)
+
+### Step 5 — ЮKassa Integration (Payment Hold/Release)
+**Goal**: Integrate ЮKassa payment gateway with hold/release functionality
+- Configure ЮKassa API connection and credentials
+- Implement payment hold on deal creation
+- Implement payment release on deal completion
+- Add webhook handlers for payment status updates
+- Create Payment module with transaction tracking
+- Add User authentication (JWT-based)
+- Add role-based authorization guards
+- Write comprehensive tests for payment flows
+
+### Step 6 — Extended State Machine & Arbitration
+**Goal**: Expand state machine to full escrow workflow with arbitration
+- **New States**: DRAFT, PENDING_CONFIRMATION, RELEASED, CLOSED, REFUNDED, CANCELLED_BY_BUYER, CANCELLED_BY_SELLER
+- Database migration for extended states
+- Implement admin arbitration for DISPUTED deals
+- Add resolution workflows (refund, force-complete)
+- Create Admin panel endpoints
+- Add dispute resolution timeline tracking
+- Implement automated state transitions based on timeouts
+- WebSocket notifications for real-time updates
+
+### Step 7+ — Advanced Features
+- Crypto Gateway integration (Bitcoin, Ethereum, USDT)
+- Multi-currency support
+- API documentation (Swagger/OpenAPI)
+- Rate limiting and security hardening
+- CI/CD pipeline (GitHub Actions)
+- Docker containerization for production
+- Performance optimization and caching
+- Analytics and reporting dashboard
 
 ## User Preferences
 - Bilingual communication (English/Russian) comfortable
