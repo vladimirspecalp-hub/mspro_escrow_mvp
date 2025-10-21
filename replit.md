@@ -1,10 +1,10 @@
-# Escrow Platform - NestJS Backend
+# MSPro Escrow Platform - Full-Stack Application
 
 ## Overview
-This project is a NestJS-based backend API for an escrow platform, built with TypeScript. Its purpose is to facilitate secure escrow transactions with a focus on a robust state machine, payment integration, administrative dispute resolution, comprehensive security & audit controls, and system reliability through rate limiting and error handling. The platform aims to provide a reliable foundation for safe deal management.
+This is a full-stack escrow platform consisting of a NestJS backend API and a Next.js frontend. The system facilitates secure escrow transactions with a robust state machine, payment integration, administrative dispute resolution, comprehensive security & audit controls, real-time notifications, and a modern user interface. The platform provides a complete foundation for safe deal management with both API and web interface.
 
-**Current Version**: v1.4  
-**Current State**: Step 10 Complete - Audit Logging, Rate Limiting & Error Handling  
+**Current Version**: v1.5  
+**Current State**: Step 11 Complete - Frontend Initialization (Next.js 14)  
 **Last Updated**: October 21, 2025
 
 ## User Preferences
@@ -33,6 +33,21 @@ Key features and architectural decisions include:
 - **Database Schema**: Core tables include `users` (with roles, kyc_status, risk_score), `deals`, `payments`, `webhook_events`, and `audit_logs` (with IP/user-agent tracking), with defined relationships.
 
 ## Recent Changes
+**Step 11 (October 21, 2025) - Frontend Initialization**:
+- Created Next.js 14 project with App Router, TypeScript, and Tailwind CSS 4.1
+- Configured MSPro brand theme (primary: #0077FF, secondary: #202124, accent: #FFD700)
+- Implemented responsive layout with Header, Footer, Container components
+- Created home page with real-time deal listing and API integration
+- Installed and configured shadcn/ui components (Button, Card, Input, Alert)
+- Added lib/api.ts for backend API integration with environment-based URLs
+- Created TypeScript interfaces for User, Deal, Payment entities
+- Inter font with Latin + Cyrillic subset support for Russian UI
+- SEO metadata with OpenGraph and Russian locale
+- Fixed Tailwind CSS 4.x PostCSS configuration (@tailwindcss/postcss plugin)
+- Frontend running on port 5000, backend API on port 3000
+- **Status**: Production-ready frontend foundation with API connectivity
+- **Known Limitations**: No authentication yet (requires Step 13), some API CORS configuration may be needed
+
 **Step 10 (October 21, 2025) - Audit Logging, Rate Limiting & Error Handling**:
 - Installed @nestjs/throttler for rate limiting infrastructure
 - Created AuditModule with AuditService, AuditRepository, AuditInterceptor for centralized logging

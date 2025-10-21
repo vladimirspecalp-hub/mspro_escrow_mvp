@@ -8,7 +8,7 @@ interface Deal {
   id: number
   buyerId: number
   sellerId: number
-  amount: number
+  amount: number | string  // Prisma returns Decimal as string
   status: string
   createdAt: string
 }
@@ -86,7 +86,7 @@ export default function HomePage() {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold text-primary">
-                        ${deal.amount.toLocaleString()}
+                        ${Number(deal.amount).toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                       <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
                         {deal.status}

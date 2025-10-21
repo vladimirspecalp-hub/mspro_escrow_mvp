@@ -3,7 +3,7 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 
 🔗 **Repository**: [github.com/vladimirspecalp-hub/mspro_escrow_mvp](https://github.com/vladimirspecalp-hub/mspro_escrow_mvp)
 
-📦 **Current Version**: **v1.4 - Audit Logging, Rate Limiting & Error Handling**
+📦 **Current Version**: **v1.5 - Frontend Foundation (Next.js 14)**
 
 ## ✅ Step Progress
 - **Step 1** — Initialization (NestJS scaffold, /health endpoint) — ✅ Completed
@@ -16,15 +16,18 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - **Step 8** — Notifications & Integrations (Email + Telegram) — ✅ Completed
 - **Step 9** — KYC & User Verification (Identity verification, deal limits) — ✅ Completed
 - **Step 10** — Audit Logging, Rate Limiting & Error Handling — ✅ Completed
+- **Step 11** — **Frontend Initialization (Next.js 14 + Tailwind CSS + shadcn/ui)** — ✅ Completed
 
 ## 🗺️ Roadmap to v2.0
-- **Step 11** — ЮKassa Integration (Real Payment Gateway) — 📋 Planned
-- **Step 12** — Frontend Dashboard (Admin Panel) — 📋 Planned
-- **Step 13** — Crypto Gateway, Multi-currency — 📋 Planned
+- **Step 12** — ЮKassa Integration (Real Payment Gateway) — 📋 Planned
+- **Step 13** — Authentication & User Management — 📋 Planned
+- **Step 14** — Crypto Gateway, Multi-currency — 📋 Planned
 
 ## 🧠 Architecture
 
 ### Technology Stack
+
+**Backend**:
 - **Framework**: NestJS (TypeScript)
 - **Database**: PostgreSQL (Neon-hosted via Replit)
 - **ORM**: Prisma 6.17.1
@@ -32,6 +35,13 @@ Escrow / Safe Deal System (Hold & Release + Crypto Gateway)
 - **Testing**: Jest + Supertest
 - **Code Quality**: ESLint + Prettier
 - **Deployment**: Docker-ready
+
+**Frontend**:
+- **Framework**: Next.js 14 (App Router, TypeScript)
+- **Styling**: Tailwind CSS 4.1 with MSPro brand colors
+- **UI Components**: shadcn/ui (custom implementation)
+- **Font**: Inter (Latin + Cyrillic support)
+- **API Integration**: REST API client with environment-based URLs
 
 ### Implemented Modules
 - `health` — System health monitoring ✅
@@ -1275,6 +1285,133 @@ TELEGRAM_ALERTS_ON_ERROR=false  # Set to true in production
 3. **Admin Visibility**: Telegram alerts provide real-time notification of critical errors
 4. **Performance Protection**: Rate limiting prevents API abuse and DDoS attacks
 5. **Data Retention**: Configurable TTL for audit logs to manage database size
+
+---
+
+## 🎨 Step 11 — Frontend Initialization (Next.js 14 + Tailwind CSS)
+
+**Objective**: Create production-ready frontend foundation with modern UI components and backend API integration.
+
+### Technology Stack
+
+- **Next.js 14** with App Router
+- **TypeScript 5.9** for type safety
+- **Tailwind CSS 4.1** with custom MSPro brand theme
+- **shadcn/ui** components (Button, Card, Input, Alert)
+- **Inter Font** with Cyrillic support
+- **REST API Integration** with environment-based configuration
+
+### Project Structure
+
+```
+frontend/
+├── app/
+│   ├── layout.tsx           # Root layout with Header/Footer
+│   ├── page.tsx             # Home page with deal listing
+│   ├── globals.css          # Global styles + Tailwind
+│   ├── deals/               # Deal management pages (TODO)
+│   ├── auth/                # Authentication pages (TODO)
+│   └── admin/               # Admin panel (TODO)
+├── components/
+│   ├── ui/                  # shadcn/ui components
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── input.tsx
+│   │   └── alert.tsx
+│   ├── Header.tsx           # Navigation header
+│   ├── Footer.tsx           # Site footer
+│   └── Container.tsx        # Responsive container
+├── lib/
+│   ├── api.ts               # Backend API integration
+│   └── utils.ts             # Utility functions
+├── types/
+│   └── index.ts             # TypeScript interfaces
+├── public/                  # Static assets
+└── package.json
+```
+
+### Brand Colors (Tailwind Config)
+
+```typescript
+colors: {
+  primary: '#0077FF',        // MSPro Blue
+  secondary: '#202124',      // Dark Gray
+  accent: '#FFD700',         // Gold
+  background: '#FFFFFF',     // White
+  muted: '#F3F4F6',         // Light Gray
+  border: '#E5E7EB',        // Border Gray
+}
+```
+
+### API Integration
+
+**Environment Configuration** (`frontend/.env.local`):
+```env
+NEXT_PUBLIC_API_URL=https://<replit-domain>
+```
+
+**API Client** (`lib/api.ts`):
+```typescript
+export async function getDeals()
+export async function getDealById(id: number)
+export async function createDeal(data)
+export async function fundDeal(dealId, data)
+export async function releaseFunds(dealId)
+export async function openDispute(dealId, data)
+```
+
+### Features Implemented
+
+✅ **Responsive Layout** - Header, Footer, Container with mobile-first design  
+✅ **MSPro Branding** - Custom Tailwind theme with brand colors  
+✅ **Russian Localization** - Full UI in Russian with Cyrillic font support  
+✅ **API Integration** - Backend connectivity for deal operations  
+✅ **shadcn/ui Components** - Reusable, accessible UI components  
+✅ **TypeScript Types** - Full type safety (User, Deal, Payment interfaces)  
+✅ **SEO Ready** - Meta tags, OpenGraph, JSON-LD structured data  
+
+### Running the Frontend
+
+```bash
+cd frontend
+
+# Development server (port 5000)
+npm run dev
+
+# Production build
+npm run build
+
+# Start production server
+npm start
+```
+
+**Frontend URL**: http://localhost:5000  
+**Backend API**: http://localhost:3000
+
+### Home Page Features
+
+1. **Hero Section** - Platform title and description
+2. **Active Deals** - Real-time deal listing with API integration
+3. **Feature Cards** - Security, Speed, Guarantee highlights
+4. **Navigation** - Header with Главная, Сделки, Войти, Регистрация
+5. **Footer** - Links to About, Support, Legal pages
+
+### Next Frontend Steps
+
+- [ ] Authentication pages (login, register)
+- [ ] Deal creation/management UI
+- [ ] User profile & KYC pages
+- [ ] Admin dashboard
+- [ ] Real-time notifications integration
+- [ ] Payment flow UI
+
+### Known Limitations
+
+- **No Authentication** - Auth module not yet implemented (Step 13)
+- **Mock Data** - Some components use placeholder data
+- **API Errors** - CORS may need configuration for production deployment
+
+---
 
 ## 📄 Notes
 

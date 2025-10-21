@@ -1,4 +1,33 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+// Automatically determine API base URL based on environment
+function getApiBaseUrl(): string {
+  // 1. Use explicit environment variable if set
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+  
+  // 2. In browser, derive from current origin (for Replit deployments)
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol
+    const hostname = window.location.hostname
+    
+    // Replit uses port-mapped domains: xxx-5000.replit.dev (frontend) and xxx-3000.replit.dev (backend)
+    if (hostname.includes('replit.dev')) {
+      // Replace frontend port with backend port in hostname
+      const backendHostname = hostname.replace(/-\d{4}\.replit\.dev/, '-3000.replit.dev')
+      return `https://${backendHostname}`
+    }
+    
+    // Local development: use same hostname with port 3000
+    return `${protocol}//${hostname}:3000`
+  }
+  
+  // 3. Server-side fallback (for SSR)
+  return process.env.REPLIT_DOMAINS 
+    ? `https://${process.env.REPLIT_DOMAINS}` 
+    : 'http://localhost:3000'
+}
+
+const API_BASE = getApiBaseUrl()
 
 interface ApiResponse<T = any> {
   data?: T
