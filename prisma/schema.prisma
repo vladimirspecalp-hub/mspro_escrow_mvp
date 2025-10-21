@@ -44,15 +44,18 @@ model Deal {
 }
 
 model Payment {
-  id            Int           @id @default(autoincrement())
-  dealId        Int           @map("deal_id")
-  amount        Decimal       @db.Decimal(10, 2)
-  currency      String        @default("USD") @db.VarChar(3)
-  status        PaymentStatus @default(PENDING)
-  paymentMethod String?       @map("payment_method")
-  transactionId String?       @unique @map("transaction_id")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  id                     Int           @id @default(autoincrement())
+  dealId                 Int           @map("deal_id")
+  amount                 Decimal       @db.Decimal(10, 2)
+  currency               String        @default("USD") @db.VarChar(3)
+  status                 PaymentStatus @default(PENDING)
+  provider               String        @default("mock")
+  providerPaymentId      String?       @map("provider_payment_id")
+  providerTransactionId  String?       @map("provider_transaction_id")
+  paymentMethod          String?       @map("payment_method")
+  transactionId          String?       @unique @map("transaction_id")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
 
   deal Deal @relation(fields: [dealId], references: [id])
 
