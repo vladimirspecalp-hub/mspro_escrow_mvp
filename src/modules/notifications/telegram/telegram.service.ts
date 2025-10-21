@@ -21,6 +21,21 @@ export interface DealCreatedEvent {
   currency: string;
 }
 
+export interface KycVerifiedEvent {
+  userId: number;
+  email: string;
+  username: string;
+  riskScore: number;
+}
+
+export interface KycRejectedEvent {
+  userId: number;
+  email: string;
+  username: string;
+  riskScore: number;
+  reason?: string;
+}
+
 @Injectable()
 export class TelegramService {
   private readonly logger = new Logger(TelegramService.name);
@@ -93,6 +108,61 @@ ID сделки: #${event.dealId}
 
     await this.logNotification('telegram', 'deal.created', event.dealId, {
       chatId: this.adminChatId,
+    });
+  }
+
+  @OnEvent('kyc.verified')
+  async handleKycVerified(event: KycVerifiedEvent): Promise<void> {
+    this.logger.log(`Notifying admin about KYC verification for user #${event.userId}`);
+
+    const message = `
+✅ <b>KYC ВЕРИФИКАЦИЯ ОДОБРЕНА</b>
+
+Пользователь: ${event.username} (${event.email})
+ID пользователя: #${event.userId}
+Оценка риска: ${event.riskScore}/100
+Статус: Верифицирован
+
+Пользователь теперь может создавать сделки до 10,000 USD.
+    `.trim();
+
+    await this.telegramAdapter.sendMessage({
+      chatId: this.adminChatId,
+      text: message,
+      parseMode: 'HTML',
+    });
+
+    await this.logNotification('telegram', 'kyc.verified', event.userId, {
+      chatId: this.adminChatId,
+      riskScore: event.riskScore,
+    });
+  }
+
+  @OnEvent('kyc.rejected')
+  async handleKycRejected(event: KycRejectedEvent): Promise<void> {
+    this.logger.log(`Notifying user about KYC rejection for user #${event.userId}`);
+
+    const message = `
+❌ <b>KYC ВЕРИФИКАЦИЯ ОТКЛОНЕНА</b>
+
+Пользователь: ${event.username} (${event.email})
+ID пользователя: #${event.userId}
+Оценка риска: ${event.riskScore}/100
+${event.reason ? `Причина: ${event.reason}` : ''}
+
+Статус: Отклонено. Пользователь не может создавать сделки.
+    `.trim();
+
+    await this.telegramAdapter.sendMessage({
+      chatId: this.adminChatId,
+      text: message,
+      parseMode: 'HTML',
+    });
+
+    await this.logNotification('telegram', 'kyc.rejected', event.userId, {
+      chatId: this.adminChatId,
+      riskScore: event.riskScore,
+      reason: event.reason,
     });
   }
 
