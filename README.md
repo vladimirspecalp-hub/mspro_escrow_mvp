@@ -150,6 +150,324 @@ The PostgreSQL database includes the following tables:
 - **User → Audit Logs**: One-to-Many
 - **Deal → Payments**: One-to-Many
 
+## 📐 Database Design (Step 3)
+
+### ORM Selection: Prisma
+
+**Decision**: Prisma ORM 6.17.1
+
+**Rationale**:
+- **Type Safety**: Auto-generated TypeScript types from schema
+- **Developer Experience**: Intuitive API, excellent VS Code integration
+- **NestJS Integration**: First-class support via injectable services
+- **Migration Management**: Declarative schema with automatic migration generation
+- **Performance**: Optimized queries, connection pooling built-in
+- **Ecosystem**: Strong community, Prisma Studio for database visualization
+
+**Alternatives Considered**:
+- **TypeORM**: More verbose, annotations-based approach
+- **MikroORM**: Similar to TypeORM, less NestJS adoption
+- **Sequelize**: Promise-based, but lacks TypeScript-first approach
+
+### Migration Strategy
+
+#### Development Workflow
+```bash
+# 1. Modify prisma/schema.prisma
+# 2. Create migration
+npx prisma migrate dev --name descriptive_name
+
+# 3. Prisma Client auto-regenerates
+# 4. Test changes locally
+npm test && npm run test:e2e
+```
+
+#### Production Deployment
+```bash
+# 1. Apply migrations (CI/CD pipeline)
+npx prisma migrate deploy
+
+# 2. Verify with health check
+curl /db/health
+```
+
+#### Migration Rules
+- **Never** manually edit migration SQL unless absolutely necessary
+- **Always** review generated SQL before committing
+- **Backwards compatible** changes preferred (additive, not destructive)
+- **Rollback plan** required for breaking changes
+- **Data migrations** handled via seed scripts when needed
+
+#### Schema Evolution Process
+1. **Design Phase**: Document schema changes in issue/PR
+2. **Implementation**: Update `schema.prisma`
+3. **Migration**: Run `prisma migrate dev`
+4. **Code Update**: Update DTOs, services, controllers
+5. **Testing**: Unit + E2E tests for new schema
+6. **Review**: Architect review before merge
+7. **Deploy**: `prisma migrate deploy` in production
+
+### Data Validation Strategy
+
+#### Database-Level Validation
+- **Constraints**: PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL
+- **Types**: Strong typing (INTEGER, VARCHAR, DECIMAL, ENUM)
+- **Defaults**: Sensible default values (timestamps, status enums)
+- **Indexes**: Automatic on PRIMARY KEY and FOREIGN KEY
+
+#### Application-Level Validation (Planned for Step 4)
+```typescript
+// Example: DTO validation with class-validator
+import { IsEmail, IsString, MinLength, IsEnum } from 'class-validator';
+
+export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(3)
+  username: string;
+
+  @IsEnum(UserRole)
+  role: UserRole;
+}
+```
+
+#### Multi-Layer Validation Approach
+1. **DTO Layer**: Request validation via `class-validator`
+2. **Service Layer**: Business logic validation
+3. **Database Layer**: Constraints enforce data integrity
+4. **Custom Validators**: Unique email, username existence checks
+
+### Testing Strategy
+
+#### Current Implementation (Step 3)
+**Unit Tests** (5 passing):
+- DatabaseController methods
+- Mock PrismaService for isolation
+- Test health check logic
+- Test statistics aggregation
+
+**E2E Tests** (3 passing):
+- `/db/health` endpoint integration
+- `/db/stats` endpoint integration
+- Real database connection verification
+
+#### Future Testing Strategy (Step 4+)
+
+**1. Test Database Approach**
+```typescript
+// Option A: In-memory SQLite (fast, limited features)
+// Option B: Test PostgreSQL instance (slow, full features)
+// CHOSEN: Test PostgreSQL via Replit environment
+```
+
+**2. Test Data Management**
+```typescript
+// Before each test suite
+beforeAll(async () => {
+  await prisma.$connect();
+});
+
+// Clean up after tests
+afterAll(async () => {
+  await prisma.user.deleteMany();
+  await prisma.deal.deleteMany();
+  await prisma.$disconnect();
+});
+```
+
+**3. Integration Testing Layers**
+- **Repository Tests**: Prisma queries return correct data
+- **Service Tests**: Business logic with mocked Prisma
+- **Controller Tests**: HTTP layer with mocked services
+- **E2E Tests**: Full stack with real database
+
+**4. Test Scenarios**
+- CRUD operations for each entity
+- Foreign key constraints enforcement
+- Unique constraint violations
+- Transaction rollback on errors
+- Concurrent access handling
+
+### ORM Integration Plan (NestJS Modules)
+
+#### Architecture Pattern
+
+```
+┌─────────────────────────────────────────┐
+│          NestJS Application             │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌──────────┐  ┌──────────┐  ┌────────┐│
+│  │  User    │  │  Deal    │  │Payment ││
+│  │  Module  │  │  Module  │  │ Module ││
+│  └────┬─────┘  └────┬─────┘  └───┬────┘│
+│       │             │             │     │
+│  ┌────▼─────────────▼─────────────▼───┐ │
+│  │         PrismaService               │ │
+│  │  (Global Injectable Singleton)      │ │
+│  └────────────────┬────────────────────┘ │
+│                   │                      │
+└───────────────────┼──────────────────────┘
+                    │
+            ┌───────▼────────┐
+            │   PostgreSQL   │
+            │   (Neon Cloud) │
+            └────────────────┘
+```
+
+#### Integration Steps
+
+**Step 1: PrismaService (✅ Implemented)**
+```typescript
+// src/prisma.service.ts
+@Injectable()
+export class PrismaService extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy {
+  
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
+```
+
+**Step 2: Module-Level Injection**
+```typescript
+// Future: src/modules/users/users.module.ts
+@Module({
+  imports: [DatabaseModule],  // Provides PrismaService
+  providers: [UsersService],
+  controllers: [UsersController],
+})
+export class UsersModule {}
+```
+
+**Step 3: Service-Level Usage**
+```typescript
+// Future: src/modules/users/users.service.ts
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
+
+  async create(data: CreateUserDto) {
+    return this.prisma.user.create({ data });
+  }
+}
+```
+
+#### Dependency Flow
+1. **DatabaseModule** exports PrismaService
+2. **Feature Modules** (Users, Deals, Payments) import DatabaseModule
+3. **Services** inject PrismaService for database operations
+4. **Controllers** inject Services for business logic
+5. **DTOs** define data shape with validation decorators
+
+#### Transaction Management (Future)
+```typescript
+// Complex operations requiring atomicity
+async createDealWithPayment(dealData, paymentData) {
+  return this.prisma.$transaction(async (tx) => {
+    const deal = await tx.deal.create({ data: dealData });
+    const payment = await tx.payment.create({
+      data: { ...paymentData, dealId: deal.id }
+    });
+    return { deal, payment };
+  });
+}
+```
+
+### Health Check Implementation
+
+**Endpoint**: `GET /db/health`
+
+**Purpose**: Verify database connectivity and readiness
+
+**Implementation**:
+```typescript
+// src/modules/database/database.service.ts
+async checkDatabaseHealth() {
+  const isHealthy = await this.prisma.healthCheck();
+  return {
+    status: isHealthy ? 'ok' : 'error',
+    database: 'postgresql',
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// src/prisma.service.ts
+async healthCheck(): Promise<boolean> {
+  try {
+    await this.$queryRaw`SELECT 1`;
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+```
+
+**Usage in Production**:
+- Kubernetes liveness/readiness probes
+- Load balancer health checks
+- Monitoring/alerting systems
+- CI/CD pipeline verification
+
+### Database Statistics
+
+**Endpoint**: `GET /db/stats`
+
+**Purpose**: Monitor data growth and application usage
+
+**Implementation**:
+```typescript
+async getDatabaseStats() {
+  const [users, deals, payments, auditLogs] = await Promise.all([
+    this.prisma.user.count(),
+    this.prisma.deal.count(),
+    this.prisma.payment.count(),
+    this.prisma.auditLog.count(),
+  ]);
+  return { users, deals, payments, auditLogs };
+}
+```
+
+**Future Enhancements**:
+- Table size statistics
+- Query performance metrics
+- Connection pool status
+- Slow query logging
+
+### Readiness for Step 4
+
+✅ **Database Infrastructure Ready**:
+- PostgreSQL provisioned and connected
+- Prisma ORM configured and tested
+- Migration system operational
+- Health monitoring in place
+
+✅ **Next Implementation Targets**:
+1. **User Module**: CRUD operations, authentication
+2. **Deal Module**: State machine for escrow workflow
+3. **Payment Module**: Transaction tracking
+4. **Crypto Gateway**: External payment integration
+
+✅ **State Machine Design (Deals)**:
+```
+PENDING → FUNDED → IN_PROGRESS → COMPLETED
+    ↓                   ↓
+CANCELLED           DISPUTED
+```
+
+Transitions will be enforced at service layer with proper validation and audit logging.
+
 ## 🚀 Getting Started
 
 ### Prerequisites

@@ -151,10 +151,34 @@ curl http://localhost:3000/db/stats
 - **Branch**: main
 - **Status**: ✅ Successfully synced and maintained
 
+## Database Architecture (Step 3 Details)
+
+### ORM Choice: Prisma 6.17.1
+- **Rationale**: Type safety, excellent NestJS integration, declarative migrations
+- **Migration Strategy**: `prisma migrate dev` for development, `prisma migrate deploy` for production
+- **Validation**: Multi-layer (DTO → Service → Database constraints)
+- **Testing**: Unit tests with mocks, E2E tests with real PostgreSQL
+
+### Integration Pattern
+```
+Feature Modules → DatabaseModule → PrismaService → PostgreSQL
+```
+
+### Health Monitoring
+- `/db/health` - Connection verification via `SELECT 1` query
+- `/db/stats` - Table counts for monitoring data growth
+
+### State Machine (Future - Step 4)
+```
+Deal States: PENDING → FUNDED → IN_PROGRESS → COMPLETED
+                ↓                     ↓
+            CANCELLED             DISPUTED
+```
+
 ## Next Steps (Step 4)
 - Implement User module with CRUD operations
 - Add authentication and authorization (JWT)
-- Implement Deal module for escrow transactions
+- Implement Deal module for escrow transactions with state machine
 - Add Payment processing module
 - Implement Crypto Gateway integration
 - Add API documentation (Swagger)
