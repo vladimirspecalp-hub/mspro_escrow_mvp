@@ -5,34 +5,76 @@
 @layer base {
   :root {
     --primary: #0077FF;
+    --primary-dark: #0056CC;
+    --primary-light: #E8F2FF;
     --secondary: #202124;
     --accent: #FFD700;
-    --background: #FFFFFF;
-    --foreground: #202124;
-    --muted: #F3F4F6;
-    --border: #E5E7EB;
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --foreground: #0F172A;
+    --muted: #64748B;
+    --muted-bg: #F1F5F9;
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
   }
 
-  * {
-    border-color: var(--border);
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   a {
-    color: var(--primary);
-    transition: opacity 0.2s;
+    text-decoration: none;
+    transition: color 0.15s ease;
   }
 
-  a:hover {
-    opacity: 0.8;
+  input, textarea, select {
+    font-family: inherit;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: radial-gradient(circle, #E2E8F0 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .text-gradient-primary {
+    background: linear-gradient(135deg, #0077FF 0%, #00C2FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
