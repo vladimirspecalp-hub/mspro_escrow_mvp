@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../../../context/AuthContext'
 
+const TRUST_POINTS = [
+  'Шифрование банковского уровня AES-256',
+  'KYC верификация всех участников',
+  'Арбитраж споров 24/7',
+  'Telegram-уведомления в реальном времени',
+]
+
 export default function LoginPage() {
   const router = useRouter()
   const { login, user } = useAuth()
@@ -14,10 +21,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  if (user) {
-    router.push('/')
-    return null
-  }
+  if (user) { router.push('/'); return null }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,98 +31,170 @@ export default function LoginPage() {
       await login(email, password)
       router.push('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа')
+      setError(err instanceof Error ? err.message : 'Неверный email или пароль')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] bg-[#F8FAFC]">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] relative overflow-hidden items-center justify-center p-16">
-        <div className="absolute inset-0 bg-grid opacity-20" />
-        <div className="absolute top-20 left-20 h-56 w-56 rounded-full bg-[#0077FF]/20 blur-3xl" />
-        <div className="absolute bottom-20 right-20 h-40 w-40 rounded-full bg-[#0056CC]/15 blur-2xl" />
-        <div className="relative z-10 max-w-sm text-center">
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#0077FF] to-[#0056CC] shadow-xl shadow-[#0077FF]/30">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <path d="M20 3.333L36.667 11.667V20C36.667 29.667 29.333 38.667 20 41.667C10.667 38.667 3.333 29.667 3.333 20V11.667L20 3.333Z" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5"/>
-              <path d="M13 21L17.5 25.5L27 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)' }}>
+      {/* Left panel */}
+      <div style={{
+        flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        padding: '64px 48px',
+        background: 'linear-gradient(160deg, #0B1222 0%, #0F1E3A 50%, #0B1222 100%)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Grid */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.35,
+          backgroundImage: 'linear-gradient(rgba(148,163,184,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.07) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }} />
+        {/* Orbs */}
+        <div style={{ position: 'absolute', top: '10%', right: '-10%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,119,255,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '5%', left: '-5%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', maxWidth: '380px', width: '100%' }}>
+          {/* Icon */}
+          <div style={{
+            width: '72px', height: '72px', borderRadius: '20px',
+            background: 'linear-gradient(135deg, #0077FF 0%, #0056CC 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: '32px',
+            boxShadow: '0 8px 32px rgba(0,119,255,0.35)',
+          }}>
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <path d="M18 3L31 9V17C31 25.2 25.5 33 18 35.5C10.5 33 5 25.2 5 17V9L18 3Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" />
+              <path d="M12 18L16 22L24 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-4">Добро пожаловать</h2>
-          <p className="text-[#94A3B8] text-base leading-relaxed">
-            Войдите в свой аккаунт для управления безопасными эскроу-сделками
+
+          <h2 style={{ fontSize: '28px', fontWeight: 800, color: 'white', letterSpacing: '-0.03em', marginBottom: '12px', lineHeight: 1.15 }}>
+            Добро пожаловать в MSPro Escrow
+          </h2>
+          <p style={{ fontSize: '15px', color: '#64748B', lineHeight: 1.65, marginBottom: '40px' }}>
+            Платформа безопасных сделок с гарантией защиты средств на каждом этапе
           </p>
-          <div className="mt-10 space-y-4">
-            {[
-              'Защита средств на каждом этапе',
-              'Мгновенные Telegram-уведомления',
-              'Арбитраж споров 24/7',
-            ].map((feat) => (
-              <div key={feat} className="flex items-center gap-3 text-left">
-                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#0077FF]/20">
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {TRUST_POINTS.map((point) => (
+              <div key={point} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '24px', height: '24px', borderRadius: '7px', flexShrink: 0,
+                  backgroundColor: 'rgba(0,119,255,0.15)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M10 3L5 8L2 5" stroke="#60AEFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M10 3L5 8.5L2 5.5" stroke="#60A5FA" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <span className="text-sm text-[#94A3B8]">{feat}</span>
+                <span style={{ fontSize: '14px', color: '#94A3B8', lineHeight: 1.4 }}>{point}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '40px',
+          }}>
+            {[
+              { value: '12K+', label: 'Пользователей' },
+              { value: '99.8%', label: 'Успешных сделок' },
+            ].map((s) => (
+              <div key={s.label} style={{
+                padding: '16px', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                backgroundColor: 'rgba(255,255,255,0.04)',
+              }}>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{s.value}</div>
+                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '3px' }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-sm">
-          <div className="mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 mb-8 lg:hidden">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#0077FF] to-[#0056CC]">
-                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 1L16 5V9C16 12.866 12.866 16 9 16C5.134 16 2 12.866 2 9V5L9 1Z" fill="white" fillOpacity="0.9"/>
-                  <path d="M6 9L8 11L12 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="text-base font-bold text-[#0F172A]">MSPro Escrow</span>
-            </Link>
-            <h1 className="text-2xl font-bold text-[#0F172A] tracking-tight">Вход в аккаунт</h1>
-            <p className="mt-1.5 text-sm text-[#64748B]">Введите ваши данные для входа</p>
+      {/* Right panel — Form */}
+      <div style={{
+        flex: '0 0 480px', width: '480px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '48px 56px',
+        backgroundColor: 'white',
+        borderLeft: '1px solid #E2E8F0',
+      }}>
+        <div style={{ width: '100%', maxWidth: '360px' }}>
+          {/* Header */}
+          <div style={{ marginBottom: '36px' }}>
+            <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em', marginBottom: '8px' }}>
+              Вход в аккаунт
+            </h1>
+            <p style={{ fontSize: '14px', color: '#64748B' }}>
+              Введите ваши данные для входа на платформу
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Error */}
             {error && (
-              <div className="animate-fade-in flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] p-4">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5">
-                  <circle cx="8" cy="8" r="7" stroke="#EF4444" strokeWidth="1.5"/>
-                  <path d="M8 5V8.5M8 11H8.01" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round"/>
+              <div style={{
+                display: 'flex', alignItems: 'flex-start', gap: '10px',
+                padding: '14px 16px', borderRadius: '12px',
+                border: '1px solid #FECACA', backgroundColor: '#FEF2F2',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: '1px' }}>
+                  <circle cx="8" cy="8" r="7" stroke="#EF4444" strokeWidth="1.5" />
+                  <path d="M8 5V8.5M8 11H8.01" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <p className="text-sm text-[#991B1B]">{error}</p>
+                <p style={{ fontSize: '13px', color: '#991B1B', lineHeight: 1.5 }}>{error}</p>
               </div>
             )}
 
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#374151] mb-1.5">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '7px' }}>
                 Email
               </label>
               <input
-                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="your@email.com"
                 disabled={loading}
-                className="w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm text-[#0F172A] placeholder-[#94A3B8] outline-none transition-all focus:border-[#0077FF] focus:ring-2 focus:ring-[#0077FF]/20 disabled:bg-[#F8FAFC] disabled:cursor-not-allowed"
+                autoComplete="email"
+                style={{
+                  width: '100%', padding: '11px 14px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #E2E8F0',
+                  backgroundColor: '#FAFAFA',
+                  fontSize: '14px', color: '#0F172A',
+                  outline: 'none',
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#0077FF'
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0,119,255,0.12)'
+                  e.target.style.backgroundColor = 'white'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E2E8F0'
+                  e.target.style.boxShadow = 'none'
+                  e.target.style.backgroundColor = '#FAFAFA'
+                }}
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#374151] mb-1.5">
-                Пароль
-              </label>
-              <div className="relative">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Пароль</label>
+                <a href="#" style={{ fontSize: '12px', color: '#0077FF', textDecoration: 'none' }}>Забыли пароль?</a>
+              </div>
+              <div style={{ position: 'relative' }}>
                 <input
-                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -126,49 +202,100 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   minLength={6}
                   disabled={loading}
-                  className="w-full rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 pr-10 text-sm text-[#0F172A] placeholder-[#94A3B8] outline-none transition-all focus:border-[#0077FF] focus:ring-2 focus:ring-[#0077FF]/20 disabled:bg-[#F8FAFC] disabled:cursor-not-allowed"
+                  autoComplete="current-password"
+                  style={{
+                    width: '100%', padding: '11px 40px 11px 14px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #E2E8F0',
+                    backgroundColor: '#FAFAFA',
+                    fontSize: '14px', color: '#0F172A',
+                    outline: 'none',
+                    transition: 'border-color 0.15s, box-shadow 0.15s',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0077FF'
+                    e.target.style.boxShadow = '0 0 0 3px rgba(0,119,255,0.12)'
+                    e.target.style.backgroundColor = 'white'
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#E2E8F0'
+                    e.target.style.boxShadow = 'none'
+                    e.target.style.backgroundColor = '#FAFAFA'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B] transition-colors"
+                  style={{
+                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', padding: '4px', cursor: 'pointer',
+                    color: '#94A3B8', display: 'flex', alignItems: 'center',
+                  }}
                 >
                   {showPassword ? (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M2 2L14 14M6.586 6.586A2 2 0 0010.414 10.414M4.343 4.343C3.022 5.22 1.923 6.504 1.175 8c1.4 3.163 4.135 5.333 6.825 5.333.91 0 1.786-.213 2.596-.603M7.158 2.71C7.437 2.679 7.718 2.667 8 2.667c4 0 6.667 3.333 6.667 5.333 0 .782-.294 1.619-.833 2.4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+                      <path d="M2 2L15 15M7 7A2 2 0 0011 11M5 5C3.8 5.9 2.8 7.1 2.2 8.5c1.5 3.3 4.5 5.5 7.3 5.5.9 0 1.8-.2 2.6-.6M7.7 3.2C8 3.18 8.25 3.17 8.5 3.17c4.2 0 7 3.5 7 5.33 0 .8-.3 1.7-.9 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M1.333 8c1.4-3.163 4.134-5.333 6.667-5.333S13.267 4.837 14.667 8c-1.4 3.163-4.134 5.333-6.667 5.333S2.733 11.163 1.333 8z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2"/>
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+                      <path d="M1.5 8.5C3.1 5.3 5.7 3.17 8.5 3.17S13.9 5.3 15.5 8.5C13.9 11.7 11.3 13.83 8.5 13.83S3.1 11.7 1.5 8.5z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      <circle cx="8.5" cy="8.5" r="2.17" stroke="currentColor" strokeWidth="1.3" />
                     </svg>
                   )}
                 </button>
               </div>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-[#0077FF] py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0056CC] hover:shadow-md active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                width: '100%', padding: '13px',
+                borderRadius: '10px',
+                border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '14px', fontWeight: 700, color: 'white',
+                background: loading ? '#93C5FD' : 'linear-gradient(135deg, #0077FF 0%, #0056CC 100%)',
+                boxShadow: loading ? 'none' : '0 2px 8px rgba(0,119,255,0.3)',
+                transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              }}
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3"/>
-                    <path d="M12 7C12 4.239 9.761 2 7 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                  Вход...
-                </span>
-              ) : 'Войти'}
+                <>
+                  <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite' }} />
+                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  Входим...
+                </>
+              ) : 'Войти в аккаунт'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-[#64748B]">
-            Нет аккаунта?{' '}
-            <Link href="/auth/register" className="font-semibold text-[#0077FF] hover:text-[#0056CC] transition-colors">
-              Зарегистрироваться
-            </Link>
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
+            <span style={{ fontSize: '12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>или</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
+          </div>
+
+          {/* Register link */}
+          <Link href="/auth/register" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            width: '100%', padding: '12px',
+            borderRadius: '10px',
+            border: '1.5px solid #E2E8F0',
+            backgroundColor: 'white',
+            fontSize: '14px', fontWeight: 600, color: '#0F172A',
+            textDecoration: 'none',
+            transition: 'border-color 0.15s',
+          }}>
+            Создать новый аккаунт
+          </Link>
+
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#94A3B8', marginTop: '24px', lineHeight: 1.5 }}>
+            Входя в систему, вы соглашаетесь с{' '}
+            <a href="#" style={{ color: '#64748B', textDecoration: 'underline' }}>условиями использования</a>
           </p>
         </div>
       </div>

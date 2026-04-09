@@ -2,79 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --primary: #0077FF;
-    --primary-dark: #0056CC;
-    --primary-light: #E8F2FF;
-    --secondary: #202124;
-    --accent: #FFD700;
-    --background: #F8FAFC;
-    --surface: #FFFFFF;
-    --foreground: #0F172A;
-    --muted: #64748B;
-    --muted-bg: #F1F5F9;
-    --border: #E2E8F0;
-    --border-strong: #CBD5E1;
+@source "../components/**/*.{tsx,ts}";
+@source "../app/**/*.{tsx,ts}";
+@source "../context/**/*.{tsx,ts}";
+
+@theme {
+  --color-primary: #0077FF;
+  --color-primary-dark: #0056CC;
+  --color-primary-light: #EFF6FF;
+  --color-secondary: #0F172A;
+  --color-muted: #64748B;
+  --color-muted-bg: #F1F5F9;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-accent: #FFD700;
+
+  --font-family-sans: "Inter", "system-ui", "sans-serif";
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-card-md: 0 4px 16px -2px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-card-lg: 0 20px 40px -8px rgb(0 0 0 / 0.14), 0 8px 16px -4px rgb(0 0 0 / 0.06);
+  --shadow-glow-blue: 0 0 0 3px rgb(0 119 255 / 0.18);
+
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+
+  --animate-fade-in: fadeIn 0.35s ease-out both;
+  --animate-slide-up: slideUp 0.4s ease-out both;
+  --animate-slide-down: slideDown 0.3s ease-out both;
+  --animate-scale-in: scaleIn 0.2s ease-out both;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+@layer base {
   *, *::before, *::after {
     box-sizing: border-box;
   }
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: "Inter", system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
-    letter-spacing: -0.02em;
     line-height: 1.2;
+    letter-spacing: -0.025em;
   }
 
   a {
     text-decoration: none;
+    color: #0077FF;
     transition: color 0.15s ease;
   }
 
-  input, textarea, select {
+  input, button, textarea, select {
     font-family: inherit;
+    font-size: inherit;
+  }
+
+  ::selection {
+    background-color: rgb(0 119 255 / 0.15);
+    color: #0F172A;
+  }
+
+  :focus-visible {
+    outline: 2px solid #0077FF;
+    outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  .bg-grid {
-    background-image: radial-gradient(circle, #E2E8F0 1px, transparent 1px);
-    background-size: 24px 24px;
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(rgb(148 163 184 / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(148 163 184 / 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
 
-  .text-gradient-primary {
-    background: linear-gradient(135deg, #0077FF 0%, #00C2FF 100%);
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .gradient-text-blue {
+    background: linear-gradient(135deg, #0077FF 0%, #38BDF8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+  .gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 1rem;
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, #0077FF20, #CBD5E1, #0077FF20);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
   }
 }
