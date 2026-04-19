@@ -7,8 +7,26 @@ interface ContainerProps {
 
 export default function Container({ children, className = '' }: ContainerProps) {
   return (
-    <div className={`container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>
-      {children}
-    </div>
+    <>
+      <style>{`
+        .msp-container {
+          width: 100%;
+          max-width: 1280px;
+          margin-left: auto;
+          margin-right: auto;
+          padding-left: 32px;
+          padding-right: 32px;
+        }
+        @media (max-width: 768px) {
+          .msp-container { padding-left: 16px; padding-right: 16px; }
+        }
+        @media (max-width: 480px) {
+          .msp-container { padding-left: 16px; padding-right: 16px; }
+        }
+      `}</style>
+      <div className={`msp-container ${className}`}>
+        {children}
+      </div>
+    </>
   )
 }
